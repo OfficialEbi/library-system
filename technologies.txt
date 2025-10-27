@@ -1,0 +1,8 @@
+Backend: Node.js (Express)
+Frontend: HTML, CSS, Bootstrap
+Database: MySQL
+Session Management: express-session
+Password Hashing: bcrypt
+Version Control: Git + GitHub
+IDE: Visual Studio Code
+Design Tool (ERD): MySQL Workbench / draw.io
