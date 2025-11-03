@@ -15,7 +15,7 @@ const pool = await mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3308, // ✅ اضافه کن
+    port: process.env.DB_PORT || 3308,
     waitForConnections: true,
     connectionLimit: 10,
   });
@@ -35,8 +35,9 @@ app.get('/api/hello', (req, res) => {
 app.get('/api/books', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, title, author, publication_year, available_copies FROM books ORDER BY id DESC'
+      'SELECT id, title, author, category, publication_year, available_copies FROM books ORDER BY id DESC'
     );
+    
     res.json(rows);
   } catch (err) {
     console.error('❌ Database error:', err);
