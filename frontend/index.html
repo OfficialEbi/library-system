@@ -2,33 +2,92 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>سامانه کتابخانه</title>
+  <title>📚 سامانه مدیریت کتابخانه</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>لیست کتاب‌ها</h1>
-  <table id="books">
-    <thead>
-      <tr><th>عنوان</th><th>نویسنده</th><th>سال چاپ</th><th>نسخه‌های موجود</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <header>
+    <div class="container">
+      <h1>📚 سامانه مدیریت کتابخانه</h1>
+
+      <nav>
+        <ul>
+          <li><a href="#" class="active">خانه</a></li>
+          <li><a href="#">کتاب‌ها</a></li>
+          <li><a href="#">تماس با ما</a></li>
+        </ul>
+      </nav>
+
+      <div class="actions">
+        <button id="searchBtn" title="جستجو 🔍">🔍</button>
+        <button id="loginBtn">ورود</button>
+      </div>
+    </div>
+  </header>
+
+
+  <main>
+    <section class="book-list">
+      <h2>📚 لیست کتاب‌ها</h2>
+      <div id="bookCards" class="book-cards"></div>
+    </section>
+
+    <section class="contact">
+      <h2>تماس با ما</h2>
+      <p>ایمیل: ebrahim.vahidnia@gmail.com</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>سامانه کتابخانه </p>
+    </div>
+  </footer>
 
   <script>
+    
     async function loadBooks() {
-      const res = await fetch('http://localhost:3000/api/books');
-      const data = await res.json();
-      const tbody = document.querySelector('#books tbody');
-      tbody.innerHTML = data.map(book => `
-        <tr>
-          <td>${book.title}</td>
-          <td>${book.author}</td>
-          <td>${book.publication_year}</td>
-          <td>${book.available_copies}</td>
-        </tr>
+      try {
+        const response = await fetch('http://localhost:3000/api/books');
+        const data = await response.json();
+  
+        // نمایش کتاب‌ ها
+        renderBooks(data);
+      } catch (err) {
+        console.error('❌ خطا در دریافت کتاب‌ها:', err);
+        const container = document.getElementById("bookCards");
+        container.innerHTML = `<p style="color:red; text-align:center;">❌ خطا در دریافت اطلاعات از سرور</p>`;
+      }
+    }
+  
+    // تابع نمایش کارت‌ ها
+    function renderBooks(books) {
+      const container = document.getElementById("bookCards");
+  
+      if (!books.length) {
+        container.innerHTML = `<p style="text-align:center;">هیچ کتابی در سیستم ثبت نشده است.</p>`;
+        return;
+      }
+  
+      container.innerHTML = books.map(book => `
+        <div class="book-card">
+          <div class="book-cover">
+            <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="book">
+          </div>
+          <div class="book-info">
+            <h3>${book.title}</h3>
+            <p><strong>نویسنده:</strong> ${book.author || '-'}</p>
+            <p><strong>دسته‌بندی:</strong> ${book.category || '-'}</p>
+            <p><strong>سال چاپ:</strong> ${book.publication_year || '-'}</p>
+            <p class="copies">📖 نسخه‌های موجود: ${book.available_copies}</p>
+          </div>
+        </div>
       `).join('');
     }
+  
+    // اجرای تابع هنگام باز شدن صفحه
     loadBooks();
   </script>
+  
 </body>
 </html>
