@@ -38,7 +38,7 @@ async function init() {
     console.log("✅ Database connected successfully!");
 
     // -----------------------------
-    // 🔐 Middlewares
+    //  Middlewares
     // -----------------------------
     function auth(req, res, next) {
       const header = req.headers.authorization;

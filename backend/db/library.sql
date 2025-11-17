@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS borrows (
   FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
---  داده تستی اولیه
 
 -- مدیر اصلی سامانه
 INSERT INTO users (name, email, password, role)
