@@ -1,20 +1,37 @@
-/* ساختار کلی */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600&display=swap');
+/* فقط محتوا فاصله داشته باشه */
+main, .search-area, .stats, .new-books, .footer-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* هدر فول‌ویدث بمونه */
+header {
+  padding: 15px;
+  width: 100%;
+}
+
+
 body {
   font-family: "Vazirmatn", sans-serif;
   direction: rtl;
-  background: #f5f6fa;
+  background: #f4f7fb;
   color: #222;
   margin: 0;
 }
 
-/* هدر */
+
+/* Header */
 header {
-  background: #1f3c88;
+  background: linear-gradient(90deg, #1f3c88, #274ea5);
   color: white;
   padding: 15px 0;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-
 .container {
   width: 90%;
   margin: 0 auto;
@@ -22,63 +39,97 @@ header {
   justify-content: space-between;
   align-items: center;
 }
-
-header h1 {
-  font-size: 22px;
-  margin: 0;
-}
-
+header h1 { font-size: 20px; margin: 0; }
 nav ul {
   list-style: none;
   display: flex;
-  gap: 12px;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
 }
-
-nav ul li a {
+nav a {
   color: white;
   text-decoration: none;
+  font-weight: 500;
   padding: 6px 10px;
-  border-radius: 5px;
+  border-radius: 6px;
   transition: 0.2s;
 }
-
-nav ul li a:hover,
-nav ul li a.active {
+nav a:hover,
+nav a.active {
   background: #f9b234;
   color: #222;
 }
-
-.auth button {
-  background: #f9b234;
+.header-icons button {
+  background: transparent;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  color: white;
+  font-size: 18px;
   cursor: pointer;
-  font-weight: bold;
+  transition: 0.3s;
+}
+.header-icons button:hover { transform: scale(1.1); }
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(120deg, #1f3c88, #3c66e0);
+  color: rgb(33, 0, 93);
+  text-align: center;
+  padding: 60px 20px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/2232/2232688.png');
+  background-repeat: no-repeat;
+  background-position: center 130px;
+  background-size: 120px;
+}
+.hero-content h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+}
+.hero-content p {
+  margin-top: 10px;
+  font-size: 15px;
 }
 
-/* جستجو */
-.search-box {
+/* Search Area */
+.search-area {
   background: #fff;
-  width: 90%;
-  margin: 25px auto;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: 85%;
+  margin: -30px auto 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 20px;
+  text-align: center;
+}
+.tabs {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.tabs button {
+  border: none;
+  background: #f0f0f0;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.tabs button.active {
+  background: #1f3c88;
+  color: white;
+}
+.search-box {
+  display: flex;
   justify-content: center;
   gap: 10px;
 }
-
-.search-box input,
-.search-box select {
+.search-box input {
+  width: 60%;
   padding: 8px 12px;
-  border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 14px;
+  border: 1px solid #ccc;
 }
-
 .search-box button {
   background: #1f3c88;
   color: white;
@@ -86,156 +137,244 @@ nav ul li a.active {
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
+  transition: 0.3s;
 }
-.search-box button:hover {
-  background: #274da0;
+.search-box button:hover { background: #2e51ad; }
+
+/* Stats Section */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  width: 85%;
+  margin: 30px auto;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 250px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+.stat-card:hover { transform: translateY(-4px); }
+.stat-card .icon {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+.stat-card h3 { color: #1f3c88; margin: 6px 0; }
+.stat-card p {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
 }
 
-/* کارت‌های کتاب */
-.book-list {
+/* New Books */
+.new-books {
   width: 90%;
-  margin: auto;
+  margin: 40px auto;
   text-align: center;
 }
-.book-list h2 {
+.new-books h2 {
   color: #1f3c88;
   margin-bottom: 20px;
 }
-
-.book-cards {
+.book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 20px;
 }
-
-.book-card {
+.book-item {
   background: #fff;
   border-radius: 10px;
   padding: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: 0.3s;
-  text-align: right;
 }
+.book-item:hover { transform: translateY(-3px); }
+.book-item img { width: 70px; margin-bottom: 10px; }
+.book-item h4 { margin: 5px 0; color: #1f3c88; }
+.book-item p { margin: 3px 0 10px; color: #555; font-size: 14px; }
+.book-item button {
+  background: #1f3c88;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.book-item button:hover { background: #2e51ad; }
 
-.book-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-.book-cover {
-  text-align: center;
-}
-.book-cover img {
-  width: 60px;
-  margin-bottom: 10px;
-}
-
-.book-info h3 {
-  color: #1f3c88;
-  font-size: 16px;
-  margin: 5px 0 8px;
-}
-
-.book-info p {
-  margin: 3px 0;
-  font-size: 14px;
-  color: #555;
-}
-.book-info .copies {
-  margin-top: 8px;
-  font-weight: bold;
-  color: #1f3c88;
-}
-
-/* تماس */
-.contact {
-  background: #fff;
-  width: 90%;
-  margin: 40px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-/* پاورقی */
+/* Footer */
 footer {
   background: #1f3c88;
   color: white;
-  text-align: center;
-  padding: 10px;
-  font-size: 14px;
+  padding: 30px 0 10px;
+  margin-top: 40px;
 }
-/* ================================
-   دکمه‌های هدر و ماکت جستجو
-================================= */
-.actions {
+.footer-container {
+  width: 90%;
+  margin: 0 auto;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
 }
-
-.actions button {
-  background: #f9b234;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+.footer-col {
+  flex: 1 1 250px;
 }
-.actions button:hover {
-  background: #ffc34a;
+.footer-col h3 {
+  border-bottom: 2px solid #f9b234;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
 }
-
-/* پنجره جستجو */
+.footer-col p, .footer-col a {
+  color: #eee;
+  font-size: 14px;
+  text-decoration: none;
+}
+.footer-col ul { list-style: none; padding: 0; margin: 0; }
+.footer-col ul li { margin-bottom: 6px; }
+.copy {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 15px;
+  color: #ddd;
+}
+/* ========== Modal Auth Box ========== */
 .modal {
   display: none;
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 200;
 }
 
-.modal-content.search-modal {
+.modal-content {
   background: white;
-  padding: 30px;
-  border-radius: 8px;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  width: 320px;
   text-align: center;
-  width: 350px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: relative;
+  animation: fadeIn 0.3s ease;
 }
 
-.search-modal h2 {
+.modal-content h2 {
   color: #1f3c88;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
-.search-modal input,
-.search-modal select {
+.modal-content input {
   width: 90%;
+  margin: 6px 0;
   padding: 8px;
-  margin: 8px 0;
-  border-radius: 6px;
   border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.search-modal button {
+.modal-content button {
   background: #1f3c88;
   color: white;
   border: none;
   padding: 8px 16px;
+  margin-top: 10px;
   border-radius: 6px;
-  margin: 5px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.search-modal .close-btn {
-  background: #c0392b;
+.modal-content button:hover {
+  background: #2e51ad;
 }
-.search-modal .close-btn:hover {
-  background: #e74c3c;
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+}
+
+.switch-form {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.switch-form a {
+  color: #1f3c88;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+#loginMsg, #signupMsg {
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.user-name {
+  color: #fff;
+  margin-left: 10px;
+  font-weight: 600;
+  font-size: 15px;
+}
+/* ========== User Dropdown Menu (Taaghche Style) ========== */
+
+.user-menu {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  width: 160px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 10px 0;
+  z-index: 500;
+  animation: fadeInMenu .2s ease;
+}
+
+.user-menu p {
+  margin: 0;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  color: #1f3c88;
+}
+
+.user-menu button {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  color: #444;
+  transition: 0.2s;
+}
+
+.user-menu button:hover {
+  background: #f4f7fb;
+}
+
+@keyframes fadeInMenu {
+  from { opacity:0; transform: translateY(-10px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.header-icons {
+  position: relative;
 }
