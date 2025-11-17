@@ -3,7 +3,7 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";   // ⬅️ جدید
+import jwt from "jsonwebtoken";  
 
 dotenv.config();
 
@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ⬅️ اینجا pool را سراسری تعریف می‌کنیم
+//  اینجا pool را سراسری تعریف می‌ ک نیم
 let pool;
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_key";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "2h";
