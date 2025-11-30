@@ -232,13 +232,34 @@
     <!-- مدیریت کاربران -->
     <div id="users" class="section">
       <h2>👤 مدیریت کاربران</h2>
+
+      <!-- دکمه افزودن عضو جدید -->
+      <button onclick="showAddMemberForm()" style="margin-bottom:15px;background:#1f3c88;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;">
+        ➕ افزودن عضو جدید
+      </button>
+
+      <!-- فرم ثبت عضو -->
+      <div id="addMemberBox" class="form-box" style="display:none;margin-top:15px;">
+        <h3>ثبت عضو جدید</h3>
+        <input id="mName" placeholder="نام">
+        <input id="mEmail" placeholder="ایمیل">
+        <input id="mPassword" type="password" placeholder="رمز عبور">
+        <select id="mRole">
+          <option value="member">عضو</option>
+          <option value="admin">مدیر</option>
+        </select>
+        <button onclick="addMember()">ثبت</button>
+      </div>
+
       <table>
         <thead>
           <tr>
             <th>نام</th>
             <th>ایمیل</th>
             <th>نقش</th>
+            <th>ویرایش</th>
             <th>تایید</th>
+            <th>حذف</th>
           </tr>
         </thead>
         <tbody id="usersTable"></tbody>
@@ -248,12 +269,13 @@
     <!-- آمار -->
     <div id="stats" class="section">
       <h2>📊 آمار و گزارش‌ها</h2>
-      <p></p>
+      <p>در حال توسعه...</p>
     </div>
 
   </div>
 
-  <script>
+<script>
+
     function showSection(id) {
       document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
       document.getElementById(id).classList.add("active");
@@ -267,114 +289,261 @@
       localStorage.removeItem("user");
       window.location.href = "index.html";
     }
+
     const API = "http://localhost:3000";
-const token = localStorage.getItem("token");
-
-// =============================
-// 🔵 لود داشبورد (آمار)
-// =============================
-async function loadDashboard() {
     const token = localStorage.getItem("token");
-  
-    try {
-      // ----- Books -----
-      const resBooks = await fetch(`${API}/api/stats/books`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-      const books = await resBooks.json();
-      document.getElementById("countBooks").innerText = books.count;
-  
-      // ----- Users -----
-      const resUsers = await fetch(`${API}/api/stats/users`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-      const users = await resUsers.json();
-      document.getElementById("countUsers").innerText = users.count;
-  
-      // ----- Borrows -----
-      const resBorrows = await fetch(`${API}/api/stats/borrows`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-      const borrows = await resBorrows.json();
-      document.getElementById("countBorrows").innerText = borrows.count;
-  
-    } catch (err) {
-      console.log("❌ Error loading dashboard:", err);
+
+    /* -----------------------------
+       لود داشبورد
+    -----------------------------*/
+    async function loadDashboard() {
+      try {
+        const resBooks = await fetch(`${API}/api/stats/books`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const books = await resBooks.json();
+        document.getElementById("countBooks").innerText = books.count;
+
+        const resUsers = await fetch(`${API}/api/stats/users`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const users = await resUsers.json();
+        document.getElementById("countUsers").innerText = users.count;
+
+        const resBorrows = await fetch(`${API}/api/stats/borrows`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const borrows = await resBorrows.json();
+        document.getElementById("countBorrows").innerText = borrows.count;
+
+      } catch (err) {
+        console.log("❌ Error loading dashboard:", err);
+      }
     }
-  }
-  
 
-// =============================
-// 📘 لود کتاب‌ها
-// =============================
-async function loadBooks() {
-  const res = await fetch(`${API}/api/books`, {
-    headers: { Authorization: "Bearer " + token },
-  });
-  const books = await res.json();
+    /* -----------------------------
+       لود کتاب‌ها
+    -----------------------------*/
+    async function loadBooks() {
+      const res = await fetch(`${API}/api/books`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      const books = await res.json();
 
-  document.getElementById("booksTable").innerHTML = books
-    .map(
-      (b) => `
-    <tr>
-      <td>${b.title}</td>
-      <td>${b.author}</td>
-      <td>${b.publication_year}</td>
-      <td>${b.available_copies}</td>
-      <td><button class="btn-edit" onclick='editBook(${JSON.stringify(b)})'>ویرایش</button></td>
-      <td><button class="btn-del" onclick="deleteBook(${b.id})">حذف</button></td>
-    </tr>`
-    )
-    .join("");
-}
+      document.getElementById("booksTable").innerHTML = books
+        .map(
+          (b) => `
+        <tr>
+          <td>${b.title}</td>
+          <td>${b.author}</td>
+          <td>${b.publication_year}</td>
+          <td>${b.available_copies}</td>
+          <td><button class="btn-edit" onclick='editBook(${JSON.stringify(b)})'>ویرایش</button></td>
+          <td><button class="btn-del" onclick="deleteBook(${b.id})">حذف</button></td>
+        </tr>`
+        )
+        .join("");
+    }
 
+    /* -----------------------------
+       تابع ویرایش کتاب
+    -----------------------------*/
+    function editBook(book) {
+      const newTitle = prompt("عنوان جدید:", book.title);
+      const newAuthor = prompt("نویسنده جدید:", book.author);
+      const newYear = prompt("سال جدید:", book.publication_year);
+      const newCategory = prompt("دسته‌بندی جدید:", book.category);
+      const newCopies = prompt("نسخه جدید:", book.available_copies);
 
-// =============================
-// 👤 مدیریت کاربران
-// =============================
-async function loadUsers() {
-  const res = await fetch(`${API}/api/users`, {
-    headers: { Authorization: "Bearer " + token },
-  });
-  const users = await res.json();
+      fetch(`${API}/api/books/${book.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({
+          title: newTitle,
+          author: newAuthor,
+          publication_year: newYear,
+          category: newCategory,
+          available_copies: newCopies
+        })
+      }).then(() => {
+        alert("کتاب ویرایش شد");
+        loadBooks();
+      });
+    }
 
-  document.getElementById("usersTable").innerHTML = users
-    .map(
-      (u) => `
-    <tr>
-      <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td>${u.role}</td>
-      <td>
-        ${
-          u.role === "pending"
-            ? `<button class="btn-edit" onclick="approveUser(${u.id})">تایید</button>`
-            : "✔ تاییدشده"
-        }
-      </td>
-    </tr>`
-    )
-    .join("");
-}
+    /* -----------------------------
+       ذخیره کتاب جدید
+    -----------------------------*/
+    async function saveBook() {
+      const title = title.value;
+      const author = author.value;
+      const year = year.value;
+      const category = category.value;
+      const copies = copies.value;
 
-async function approveUser(id) {
-  await fetch(`${API}/api/users/${id}/approve`, {
-    method: "PUT",
-    headers: { Authorization: "Bearer " + token },
-  });
+      fetch(`${API}/api/books`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          author,
+          category,
+          publication_year: year,
+          available_copies: copies
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert("کتاب ثبت شد");
+        loadBooks();
+      });
+    }
 
-  alert("کاربر تایید شد");
-  loadUsers();
-}
+    /* -----------------------------
+       حذف کتاب
+    -----------------------------*/
+    async function deleteBook(id) {
+      if (!confirm("حذف شود؟")) return;
 
-// =============================
-// 🌟 لود اولیه
-// =============================
-loadBooks();
-loadUsers();
-loadDashboard();
+      await fetch(`${API}/api/books/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token },
+      });
 
-  </script>
+      alert("کتاب حذف شد");
+      loadBooks();
+    }
+
+    /* =============================
+       مدیریت اعضا
+    =============================*/
+
+    function showAddMemberForm() {
+      addMemberBox.style.display = "block";
+    }
+
+    /* افزودن عضو */
+    async function addMember() {
+      const name = mName.value;
+      const email = mEmail.value;
+      const password = mPassword.value;
+      const role = mRole.value;
+
+      const res = await fetch(`${API}/api/admin/users`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, password, role })
+      });
+
+      const data = await res.json();
+      alert(data.message || data.error);
+
+      loadUsers();
+    }
+
+    /* ویرایش عضو */
+    function editUser(u) {
+      const newName = prompt("نام جدید:", u.name);
+      const newEmail = prompt("ایمیل جدید:", u.email);
+      const newRole = prompt("نقش جدید (admin/member):", u.role);
+
+      fetch(`${API}/api/admin/users/${u.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({
+          name: newName,
+          email: newEmail,
+          role: newRole
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        loadUsers();
+      });
+    }
+
+    /* حذف عضو */
+    function deleteUser(id) {
+      if (!confirm("حذف کاربر؟")) return;
+
+      fetch(`${API}/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token }
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        loadUsers();
+      });
+    }
+
+    /* تایید عضو Pending */
+    async function approveUser(id) {
+      await fetch(`${API}/api/users/${id}/approve`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      alert("کاربر تایید شد");
+      loadUsers();
+    }
+
+    /* -----------------------------
+       لود کاربران
+    -----------------------------*/
+    async function loadUsers() {
+      const res = await fetch(`${API}/api/users`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      const users = await res.json();
+
+      usersTable.innerHTML = users
+        .map(
+          (u) => `
+        <tr>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td>${u.role}</td>
+
+          <td><button class="btn-edit" onclick='editUser(${JSON.stringify(u)})'>ویرایش</button></td>
+
+          <td>
+            ${
+              u.role === "pending"
+                ? `<button class="btn-edit" onclick="approveUser(${u.id})">تایید</button>`
+                : "✔"
+            }
+          </td>
+
+          <td>
+            <button class="btn-del" onclick="deleteUser(${u.id})">حذف</button>
+          </td>
+        </tr>`
+        )
+        .join("");
+    }
+
+    /* -----------------------------
+       اجرای اولیه
+    -----------------------------*/
+    loadBooks();
+    loadUsers();
+    loadDashboard();
+
+</script>
 
 </body>
 </html>

@@ -38,7 +38,7 @@ async function init() {
     console.log("✅ Database connected successfully!");
 
     // -----------------------------
-    //  Middlewares
+    // Middlewares
     // -----------------------------
     function auth(req, res, next) {
       const header = req.headers.authorization;
@@ -61,7 +61,19 @@ async function init() {
     }
 
     // --------------------------------------
-    // 📘 CRUD کتاب‌ها
+    // 📘 API عمومی کتاب‌ها (برای index.html)
+    // --------------------------------------
+    app.get("/api/public/books", async (req, res) => {
+      try {
+        const [rows] = await pool.query("SELECT * FROM books ORDER BY id DESC");
+        res.json(rows);
+      } catch (err) {
+        res.status(500).json({ error: "خطا در دریافت کتاب‌ها" });
+      }
+    });
+
+    // --------------------------------------
+    // 📘 CRUD کتاب‌ها (فقط برای ادمین)
     // --------------------------------------
 
     // نمایش همه کتاب‌ها
@@ -76,7 +88,8 @@ async function init() {
 
     // افزودن کتاب
     app.post("/api/books", auth, admin, async (req, res) => {
-      const { title, author, category, publication_year, available_copies } = req.body;
+      const { title, author, category, publication_year, available_copies } =
+        req.body;
 
       try {
         await pool.query(
@@ -101,12 +114,20 @@ async function init() {
 
     // ویرایش کتاب
     app.put("/api/books/:id", auth, admin, async (req, res) => {
-      const { title, author, category, publication_year, available_copies } = req.body;
+      const { title, author, category, publication_year, available_copies } =
+        req.body;
 
       try {
         await pool.query(
           "UPDATE books SET title=?, author=?, category=?, publication_year=?, available_copies=? WHERE id=?",
-          [title, author, category, publication_year, available_copies, req.params.id]
+          [
+            title,
+            author,
+            category,
+            publication_year,
+            available_copies,
+            req.params.id,
+          ]
         );
         res.json({ message: "کتاب ویرایش شد" });
       } catch (err) {
@@ -118,7 +139,7 @@ async function init() {
     // 👤 مدیریت کاربران
     // --------------------------------------
 
-    // لیست کاربران
+    // لیست کاربران (همه نقش‌ها، شامل pending)
     app.get("/api/users", auth, admin, async (req, res) => {
       try {
         const [rows] = await pool.query(
@@ -139,6 +160,59 @@ async function init() {
         res.json({ message: "کاربر تایید شد" });
       } catch (err) {
         res.status(500).json({ error: "خطا در تایید کاربر" });
+      }
+    });
+
+    // ثبت کاربر جدید توسط مدیر
+    app.post("/api/admin/users", auth, admin, async (req, res) => {
+      const { name, email, password, role } = req.body;
+
+      if (!name || !email || !password)
+        return res.status(400).json({ error: "نام، ایمیل و رمز عبور الزامی است" });
+
+      try {
+        const [exists] = await pool.query("SELECT id FROM users WHERE email=?", [
+          email,
+        ]);
+        if (exists.length > 0)
+          return res.status(400).json({ error: "ایمیل تکراری است" });
+
+        const hashed = await bcrypt.hash(password, 10);
+
+        await pool.query(
+          "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+          [name, email, hashed, role || "member"]
+        );
+
+        res.json({ message: "عضو جدید ثبت شد" });
+      } catch (err) {
+        res.status(500).json({ error: "خطا در ثبت عضو" });
+      }
+    });
+
+    // ویرایش کاربر توسط مدیر
+    app.put("/api/admin/users/:id", auth, admin, async (req, res) => {
+      const { name, email, role } = req.body;
+
+      try {
+        await pool.query(
+          "UPDATE users SET name=?, email=?, role=? WHERE id=?",
+          [name, email, role, req.params.id]
+        );
+
+        res.json({ message: "عضو ویرایش شد" });
+      } catch (err) {
+        res.status(500).json({ error: "خطا در ویرایش عضو" });
+      }
+    });
+
+    // حذف کاربر توسط مدیر
+    app.delete("/api/admin/users/:id", auth, admin, async (req, res) => {
+      try {
+        await pool.query("DELETE FROM users WHERE id=?", [req.params.id]);
+        res.json({ message: "عضو حذف شد" });
+      } catch (err) {
+        res.status(500).json({ error: "خطا در حذف عضو" });
       }
     });
 
@@ -168,12 +242,12 @@ async function init() {
         );
         res.json({ count: row.count });
       } catch {
-        res.json({ count: 0 }); // اگر جدول هنوز ساخته نشده
+        res.json({ count: 0 });
       }
     });
 
     // --------------------------------------
-    // 📝 ثبت‌نام
+    // 📝 ثبت‌نام (کاربر عادی → pending)
     // --------------------------------------
     app.post("/api/signup", async (req, res) => {
       const { name, email, password } = req.body;
@@ -196,7 +270,7 @@ async function init() {
           [name, email, hashed]
         );
 
-        res.json({ message: "ثبت‌نام انجام شد" });
+        res.json({ message: "ثبت‌نام انجام شد. منتظر تایید مدیر باشید." });
       } catch (err) {
         res.status(500).json({ error: "خطا در ثبت‌نام" });
       }

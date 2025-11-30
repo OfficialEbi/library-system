@@ -20,27 +20,41 @@
           <li><a href="#">تماس</a></li>
         </ul>
       </nav>
+
       <div class="header-icons">
         <span id="userNameDisplay" class="user-name"></span>
-      
+
         <button id="openAuth" title="ورود">ورود</button>
-      
         <button id="logoutBtn" style="display:none;" title="خروج">🚪</button>
-      
-        <!-- منوی بازشو -->
+
         <div id="userMenu" class="user-menu" style="display:none;">
           <p id="menuUserName">نام کاربر</p>
           <button id="menuProfile">پروفایل</button>
           <button id="menuLogout">خروج</button>
         </div>
-      
+
         <button title="تنظیمات">⚙️</button>
       </div>
-      
-      
-      
+
     </div>
   </header>
+
+  <!-- پیام Pending -->
+  <div id="pendingBox" style="
+    display:none;
+    background:#fff3cd;
+    color:#7f6500;
+    border:1px solid #ffeeba;
+    padding:12px;
+    margin:15px auto;
+    width:90%;
+    border-radius:8px;
+    text-align:center;
+    font-weight:bold;
+    font-size:15px;
+  ">
+    حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.
+  </div>
 
   <!-- Hero -->
   <section class="hero">
@@ -52,8 +66,7 @@
 
   <!-- Search -->
   <section class="search-area">
-    <div class="tabs">
-    </div>
+    <div class="tabs"></div>
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="عبارت مورد نظر را وارد کنید ...">
       <button id="searchBtn">🔍 جستجو</button>
@@ -87,34 +100,34 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="footer-container">
-      <div class="footer-col">
-        <h3>درباره سامانه</h3>
-        <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است. </p>
-      </div>
-
-      <div class="footer-col">
-        <h3>پیوندهای مفید</h3>
-        <ul>
-          <li><a href="#">کتابخانه </a></li>
-          <li><a href="#"></a></li>
-          <li><a href="#">سیستم عضویت</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h3>ارتباط با ما</h3>
-        <p>📧 info@</p>
-        <p>☎️ ۰۵۶-</p>
-        <p>📍 بیرجند، دانشگاه ابن‌حسام</p>
-      </div>
+<!-- Footer -->
+<footer>
+  <div class="footer-container">
+    <div class="footer-col">
+      <h3>درباره سامانه</h3>
+      <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است. </p>
     </div>
 
-    <p class="copy"> کلیه حقوق این سامانه محفوظ است.</p>
-  </footer>
-<!-- Login / Signup Modal -->
+    <div class="footer-col">
+      <h3>پیوندهای مفید</h3>
+      <ul>
+        <li><a href="#">کتابخانه </a></li>
+        <li><a href="#">سیستم عضویت</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h3>ارتباط با ما</h3>
+      <p>📧 info@</p>
+      <p>☎️ ۰۵۶-</p>
+      <p>📍 بیرجند، دانشگاه ابن‌حسام</p>
+    </div>
+  </div>
+
+  <p class="copy"> کلیه حقوق این سامانه محفوظ است.</p>
+</footer>
+
+<!-- Modal Login/Signup -->
 <div id="authModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">✖</span>
@@ -133,232 +146,224 @@
       <input type="text" id="signupName" placeholder="نام و نام خانوادگی" required>
       <input type="email" id="signupEmail" placeholder="ایمیل" required>
       <input type="password" id="signupPassword" placeholder="رمز عبور" required>
+      <input type="password" id="signupPassword2" placeholder="تکرار رمز عبور" required>
+
       <button onclick="signup()">ثبت‌نام</button>
       <p class="switch-form">حساب داری؟ <a href="#" onclick="showLogin()">ورود</a></p>
       <p id="signupMsg"></p>
     </div>
   </div>
 </div>
+
 </div>
-  <!-- Script -->
-  <script>
-    const modal = document.getElementById("authModal");
-    const loginBox = document.getElementById("loginFormBox");
-    const signupBox = document.getElementById("signupFormBox");
 
-    // باز و بسته کردن پنجره
-    document.querySelector(".header-icons button[title='ورود']").onclick = () => {
-        modal.style.display = "flex";
-        showLogin();
+<!-- Script -->
+<script>
+const API = "http://localhost:3000";
+
+const modal = document.getElementById("authModal");
+const loginBox = document.getElementById("loginFormBox");
+const signupBox = document.getElementById("signupFormBox");
+
+/* ------------------- ورود / ثبت‌نام ------------------- */
+
+document.querySelector(".header-icons button[title='ورود']").onclick = () => {
+    modal.style.display = "flex";
+    showLogin();
+};
+
+function closeModal() { modal.style.display = "none"; }
+
+function showSignup() {
+    loginBox.style.display = "none";
+    signupBox.style.display = "block";
+}
+
+function showLogin() {
+    signupBox.style.display = "none";
+    loginBox.style.display = "block";
+}
+
+/* ------------------- ثبت‌نام ------------------- */
+async function signup() {
+  const name = signupName.value;
+  const email = signupEmail.value;
+  const password = signupPassword.value;
+  const pass2 = signupPassword2.value;
+
+  if (password !== pass2) {
+    signupMsg.textContent = "❌ رمزها یکسان نیستند";
+    signupMsg.style.color = "red";
+    return;
+  }
+
+  const res = await fetch(`${API}/api/signup`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({name,email,password})
+  });
+
+  const data = await res.json();
+  signupMsg.textContent = data.message || data.error;
+  signupMsg.style.color = data.error ? "red" : "green";
+}
+
+/* ------------------- ورود ------------------- */
+async function login() {
+  const email = loginEmail.value;
+  const password = loginPassword.value;
+
+  const res = await fetch(`${API}/api/login`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({email,password})
+  });
+
+  const data = await res.json();
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    userNameDisplay.textContent = data.user.name;
+    logoutBtn.style.display = "inline-block";
+    openAuth.style.display = "none";
+
+    closeModal();
+
+    window.location.reload();
+  } else {
+    loginMsg.textContent = data.error;
+    loginMsg.style.color = "red";
+  }
+}
+
+/* ------------------- لود کاربر ذخیره‌شده ------------------- */
+window.addEventListener("DOMContentLoaded", () => {
+  const savedUser = localStorage.getItem("user");
+
+  if (savedUser) {
+    const userObj = JSON.parse(savedUser);
+    userNameDisplay.textContent = userObj.name;
+
+    logoutBtn.style.display = "inline-block";
+    openAuth.style.display = "none";
+
+    menuUserName.textContent = userObj.name;
+
+    // اگر pending بود پیام را نشان بده
+    if (userObj.role === "pending") {
+      pendingBox.style.display = "block";
+    }
+
+    // پروفایل → پنل عضو
+    menuProfile.onclick = () => {
+      window.location.href = "member-panel.html";
     };
-    function closeModal() {
-        modal.style.display = "none";
-    }
+  }
+});
 
-    // تعویض بین فرم ورود و ثبت‌نام
-    function showSignup() {
-        loginBox.style.display = "none";
-        signupBox.style.display = "block";
-    }
-    function showLogin() {
-        signupBox.style.display = "none";
-        loginBox.style.display = "block";
-    }
+/* ------------------- جستجو ------------------- */
+let allBooks = [];
 
-    // ثبت‌نام
-    async function signup() {
-        const name = document.getElementById("signupName").value;
-        const email = document.getElementById("signupEmail").value;
-        const password = document.getElementById("signupPassword").value;
-        const msg = document.getElementById("signupMsg");
+/* ------------------- لود کتاب‌ها ------------------- */
+async function loadBooks() {
+  const grid = document.getElementById("bookGrid");
+  const res = await fetch(`${API}/api/public/books`);
+  const books = await res.json();
+  allBooks = books;
 
-        try {
-            const res = await fetch("http://localhost:3000/api/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password }),
-            });
-            const data = await res.json();
-            msg.textContent = data.message || data.error;
-            msg.style.color = data.error ? "red" : "green";
-        } catch (err) {
-            msg.textContent = "❌ خطا در ارتباط با سرور";
-            msg.style.color = "red";
-        }
-    }
+  const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const pending = savedUser.role === "pending";
 
-    //  ورود + تشخیص نقش ادمین 
-    async function login() {
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
-        const msg = document.getElementById("loginMsg");
+  grid.innerHTML = books.map(book => `
+    <div class="book-item">
+      <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" />
 
-        try {
-            const res = await fetch("http://localhost:3000/api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await res.json();
+      <h4>${book.title}</h4>
+      <p><strong>نویسنده:</strong> ${book.author}</p>
+      <p><strong>سال چاپ:</strong> ${book.publication_year}</p>
+      <p class="copies">📖 موجودی: ${book.available_copies}</p>
 
-            msg.textContent = data.message || data.error;
-            msg.style.color = data.token ? "green" : "red";
+      ${
+        pending
+        ? `<button class="btn-borrow disabled" 
+             style="background:#999;cursor:not-allowed;"
+             onclick="alert('پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.')">
+             امانت
+           </button>`
+        : `<button class="btn-borrow"
+             onclick="borrowBook(${book.id})">
+             امانت
+           </button>`
+      }
 
-            // اگر ورود موفق بود
-            if (data.token) {
-                // ذخیره توکن و اطلاعات کاربر
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
+      <!-- دکمه اطلاعات بیشتر -->
+      <button class="btn-info" onclick="showBookDetails(${book.id})">
+        اطلاعات بیشتر
+      </button>
 
-                closeModal();
+    </div>
+  `).join("");
 
-                // نمایش نام کاربر
-                document.getElementById("userNameDisplay").textContent = data.user.name;
-                document.getElementById("logoutBtn").style.display = "inline-block";
-                document.getElementById("openAuth").style.display = "none";
-                updateMenuName(data.user.name);
+  document.getElementById("totalBooks").textContent = books.length;
+}
 
-                // ❗❗ اگر ادمین است → مستقیم برود admin-panel.html
-                if (data.user.role === "admin") {
-                    window.location.href = "admin-panel.html";
-                    return;
-                }
+/* ------------------- دکمه اطلاعات بیشتر ------------------- */
+function showBookDetails(id) {
+  window.location.href = `book.html?id=${id}`;
+}
 
-                // اگر ادمین نبود → پیام خوش آمد
-                alert("خوش آمدید " + data.user.name);
-            }
+/* Borrow — پیاده‌سازی بعدی */
+function borrowBook(id) {
+  alert("--.");
+}
 
-        } catch (err) {
-            msg.textContent = "❌ خطا در ارتباط با سرور";
-            msg.style.color = "red";
-        }
-    }
 
-    //  اگر ادمین قبلاً لاگین کرده → بعد رفرش مستقیم برود پنل ادمین
-    window.addEventListener("DOMContentLoaded", () => {
-        const savedUser = localStorage.getItem("user");
+/* ------------------- خروج ------------------- */
+logoutBtn.onclick = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.reload();
+};
 
-        if (savedUser) {
-            const userObj = JSON.parse(savedUser);
+/* منوی پروفایل */
+userNameDisplay.onclick = () => {
+  userMenu.style.display = (userMenu.style.display === "none") ? "block" : "none";
+};
 
-            document.getElementById("userNameDisplay").textContent = userObj.name;
-            document.getElementById("logoutBtn").style.display = "inline-block";
-            document.getElementById("openAuth").style.display = "none";
-            updateMenuName(userObj.name);
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".header-icons")) {
+    userMenu.style.display = "none";
+  }
+});
 
-            if (userObj.role === "admin") {
-                window.location.href = "admin-panel.html";
-                return;
-            }
-        }
-    });
+/* ------------------- جستجو ------------------- */
+document.getElementById("searchBtn").onclick = () => {
+  const txt = searchInput.value.trim();
+  const filtered = allBooks.filter(b =>
+    b.title.includes(txt) || b.author.includes(txt) || b.category?.includes(txt)
+  );
+  renderBooks(filtered);
+};
 
-    // بستن پنجره با کلیک بیرون
-    window.onclick = (e) => {
-        if (e.target === modal) closeModal();
-    };
 
-    // دریافت کتاب‌ها از API
-    async function loadBooks() {
-        const grid = document.getElementById("bookGrid");
-        try {
-            const res = await fetch("http://localhost:3000/api/books");
-            const books = await res.json();
-            allBooks = books;
+function renderBooks(list) {
+  const grid = document.getElementById("bookGrid");
+  grid.innerHTML = list
+    .map(
+      (book) => `
+      <div class="book-item">
+        <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" />
+        <h4>${book.title}</h4>
+        <p><strong>نویسنده:</strong> ${book.author}</p>
+      </div>
+    `
+    )
+    .join("");
+}
 
-            if (!books.length) {
-                grid.innerHTML = `<p style="text-align:center;">هیچ کتابی ثبت نشده.</p>`;
-                return;
-            }
-
-            grid.innerHTML = books.map(book => `
-                <div class="book-item">
-                    <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" />
-                    <h4>${book.title}</h4>
-                    <p><strong>نویسنده:</strong> ${book.author || '-'}</p>
-                    <p><strong>سال چاپ:</strong> ${book.publication_year || '-'}</p>
-                    <p><strong>دسته‌بندی:</strong> ${book.category || '-'}</p>
-                    <p class="copies">📖 نسخه‌های موجود: ${book.available_copies}</p>
-                    <button>مشاهده</button>
-                </div>
-            `).join("");
-
-            document.getElementById("totalBooks").textContent = books.length.toLocaleString('fa-IR');
-
-        } catch (err) {
-            grid.innerHTML = `<p style="color:red;">❌ خطا در دریافت کتاب‌ها</p>`;
-        }
-    }
-
-    // خروج
-    document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        document.getElementById("userNameDisplay").textContent = "";
-        document.getElementById("openAuth").style.display = "inline-block";
-        document.getElementById("logoutBtn").style.display = "none";
-
-        alert("🚪 خارج شدید");
-    };
-
-    // باز شدن منو
-    const userMenu = document.getElementById("userMenu");
-    const userNameDisplay = document.getElementById("userNameDisplay");
-
-    userNameDisplay.onclick = () => {
-        userMenu.style.display = (userMenu.style.display === "none") ? "block" : "none";
-    };
-
-    function updateMenuName(name) {
-        document.getElementById("menuUserName").textContent = name;
-    }
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest(".header-icons")) {
-            userMenu.style.display = "none";
-        }
-    });
-
-    // جستجو
-    document.getElementById("searchBtn").onclick = () => {
-        const text = document.getElementById("searchInput").value.trim();
-        const filtered = allBooks.filter(b =>
-            b.title.includes(text) ||
-            b.author.includes(text) ||
-            b.category.includes(text)
-        );
-        renderBooks(filtered);
-    };
-
-    document.getElementById("searchInput").addEventListener("keyup", (e) => {
-        if (e.key === "Enter") document.getElementById("searchBtn").click();
-    });
-
-    document.getElementById("menuLogout").onclick = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        userMenu.style.display = "none";
-        alert("🚪 خارج شدید");
-    };
-
-    function renderBooks(bookList) {
-        const grid = document.getElementById("bookGrid");
-        grid.innerHTML = bookList.map(book => `
-            <div class="book-item">
-                <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png" />
-                <h4>${book.title}</h4>
-                <p><strong>نویسنده:</strong> ${book.author || '-'}</p>
-                <p><strong>سال چاپ:</strong> ${book.publication_year || '-'}</p>
-                <p><strong>دسته‌بندی:</strong> ${book.category || '-'}</p>
-                <p class="copies">📖 نسخه‌های موجود: ${book.available_copies}</p>
-                <button>مشاهده</button>
-            </div>
-        `).join("");
-    }
-
-    let allBooks = [];
-    loadBooks();
+loadBooks();
 </script>
 
 </body>

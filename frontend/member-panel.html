@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <title>📘 داشبورد کاربر</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      background: #f4f7fb;
+      direction: rtl;
+      margin: 0;
+      font-family: "Vazirmatn", sans-serif;
+    }
+
+    .container-panel {
+      width: 92%;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #1f3c88;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    /* پیام pending */
+    .pending-msg {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 18px;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #7f6500;
+      margin-bottom: 25px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* فرم پروفایل */
+    .profile-box {
+      padding: 20px;
+      border-radius: 10px;
+      background: #f9f9f9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+
+    .profile-box input {
+      width: 95%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .profile-box button {
+      background: #1f3c88;
+      color: white;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* جدول امانت‌ها */
+    table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #1f3c88;
+      color: white;
+    }
+
+    .logout-btn {
+      margin-top: 25px;
+      display: inline-block;
+      background: #d9534f;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container-panel">
+    
+    <h2>📘 داشبورد کاربر</h2>
+
+    <!-- پیام Pending -->
+    <div id="pendingMsg" class="pending-msg" style="display:none;">
+      حساب شما هنوز توسط مدیر تایید نشده است.<br>
+      لطفاً منتظر تایید بمانید.
+    </div>
+
+    <!-- اطلاعات پروفایل -->
+    <div class="profile-box">
+      <h3 style="color:#1f3c88;">👤 اطلاعات پروفایل</h3>
+<br>
+
+      <label>نام:</label>
+      <br>
+
+      <input id="nameField" type="text">
+<br>
+
+      <label>ایمیل (غیرقابل‌ویرایش):</label>
+      <input id="emailField" type="text" disabled>
+<br>
+      <label>رمز عبور جدید:</label>
+      <input id="passwordField" type="password" placeholder="خالی بگذارید اگر نمی‌خواهید تغییر دهید">
+<br>
+
+      <label>تاریخ انقضا اکانت:</label>
+      <input id="expireField" type="text" disabled value="1404/01/01 (نمونه)" />
+<br>
+
+      <button onclick="updateProfile()">ذخیره تغییرات</button>
+    </div>
+
+    <!-- لیست امانت‌ها -->
+    <h3 style="color:#1f3c88;">🔁 امانت‌های شما</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>کتاب</th>
+          <th>تاریخ امانت</th>
+          <th>تاریخ بازگشت</th>
+        </tr>
+      </thead>
+      <tbody id="borrowTable">
+        <tr><td colspan="3">سیستم امانت در مرحله بعد اضافه می‌شود.</td></tr>
+      </tbody>
+    </table>
+
+    <button class="logout-btn" onclick="logout()">🚪 خروج</button>
+  </div>
+
+<script>
+  const API = "http://localhost:3000";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  /* دسترسی */
+  if (!token || !user) {
+    window.location.href = "index.html";
+  }
+
+  if (user.role === "admin") {
+    window.location.href = "admin-panel.html";
+  }
+
+  /* اگر Pending بود پیام را نشان بده */
+  if (user.role === "pending") {
+    document.getElementById("pendingMsg").style.display = "block";
+  }
+
+  /* پر کردن فرم پروفایل */
+  document.getElementById("nameField").value = user.name;
+  document.getElementById("emailField").value = user.email;
+
+  /* دکمه ذخیره تغییرات */
+  async function updateProfile() {
+    const newName = nameField.value.trim();
+    const newPassword = passwordField.value.trim();
+
+    if (!newName) {
+      alert("نام نمی‌تواند خالی باشد.");
+      return;
+    }
+
+    // این فقط UI است — API ویرایش پروفایل را در مرحله Borrow تکمیل می‌کنیم
+    alert("ذخیره شد (در مرحله بعد API کامل می‌شود)");
+  }
+
+  /* خروج */
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>
