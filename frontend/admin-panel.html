@@ -171,6 +171,7 @@
       <li onclick="showSection('books')">📚 مدیریت کتاب‌ها</li>
       <li onclick="showSection('addBook')">➕ افزودن کتاب</li>
       <li onclick="showSection('users')">👤 مدیریت کاربران</li>
+<li onclick="showSection('borrows', this)">🔁 مدیریت امانت‌ها</li>
       <li onclick="showSection('stats')">📊 آمار</li>
       <li onclick="logout()">🚪 خروج</li>
     </ul>
@@ -265,6 +266,38 @@
         <tbody id="usersTable"></tbody>
       </table>
     </div>
+<!-- مدیریت امانت‌ها -->
+  <div id="borrows" class="section">
+    
+    <h2>🔁 مدیریت امانت‌ها</h2>
+
+<!-- 👇 دقیقاً اینجا -->
+<div style="margin:15px 0;">
+  <button class="btn-edit" onclick="loadBorrows('active')">
+    امانت‌های فعال
+  </button>
+
+  <button class="btn-edit" onclick="loadBorrows('returned')">
+  سوابق امانت‌های تکمیل‌شده
+</button>
+</div>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>عضو</th>
+        <th>کتاب</th>
+        <th>تاریخ امانت</th>
+        <th>وضعیت</th>
+        <th>عملیات</th>
+      </tr>
+    </thead>
+    <tbody id="borrowsTable">
+      <tr><td colspan="5">در حال بارگذاری...</td></tr>
+    </tbody>
+  </table>
+</div>
 
     <!-- آمار -->
     <div id="stats" class="section">
@@ -275,14 +308,20 @@
   </div>
 
 <script>
+function showSection(id, el) {
+  document.querySelectorAll(".section")
+    .forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 
-    function showSection(id) {
-      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".sidebar ul li")
+    .forEach(li => li.classList.remove("active"));
+  el.classList.add("active");
 
-      document.querySelectorAll(".sidebar ul li").forEach(li => li.classList.remove("active"));
-      event.target.classList.add("active");
-    }
+  if (id === "borrows") {
+    loadBorrows("active"); // پیش‌فرض: امانت‌های فعال
+  }
+}
+
 
     function logout() {
       localStorage.removeItem("token");
@@ -377,33 +416,45 @@
     /* -----------------------------
        ذخیره کتاب جدید
     -----------------------------*/
-    async function saveBook() {
-      const title = title.value;
-      const author = author.value;
-      const year = year.value;
-      const category = category.value;
-      const copies = copies.value;
+    const titleInput = document.getElementById("title");
+const authorInput = document.getElementById("author");
+const yearInput = document.getElementById("year");
+const categoryInput = document.getElementById("category");
+const copiesInput = document.getElementById("copies");
 
-      fetch(`${API}/api/books`, {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          title,
-          author,
-          category,
-          publication_year: year,
-          available_copies: copies
-        })
-      })
-      .then(res => res.json())
-      .then(() => {
-        alert("کتاب ثبت شد");
-        loadBooks();
-      });
-    }
+    async function saveBook() {
+  const title = titleInput.value.trim();
+  const author = authorInput.value.trim();
+  const year = yearInput.value.trim();
+  const category = categoryInput.value.trim();
+  const copies = copiesInput.value.trim();
+
+  if (!title || !author || !year || !copies) {
+    alert("تمام فیلدها را وارد کنید");
+    return;
+  }
+
+  fetch(`${API}/api/books`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title,
+      author,
+      category,
+      publication_year: year,
+      available_copies: copies
+    })
+  })
+    .then(res => res.json())
+    .then(() => {
+      alert("کتاب ثبت شد");
+      loadBooks();
+    });
+}
+
 
     /* -----------------------------
        حذف کتاب
@@ -536,13 +587,99 @@
         .join("");
     }
 
+
+    /* =============================
+   مدیریت امانت‌ها (جلسه ۸)
+============================= */
+
+
+async function loadBorrows(type = "active") {
+  const endpoint =
+    type === "returned"
+      ? `${API}/api/borrows/history`
+      : `${API}/api/borrows/active`;
+
+  const res = await fetch(endpoint, {
+    headers: { Authorization: "Bearer " + token }
+  });
+
+  const borrows = await res.json();
+  const tbody = document.getElementById("borrowsTable");
+
+  if (!borrows || borrows.length === 0) {
+    tbody.innerHTML =
+      `<tr><td colspan="5">موردی یافت نشد</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = borrows.map(b => {
+    const borrowDate = new Date(b.borrow_date);
+    const returnDate = b.return_date ? new Date(b.return_date) : null;
+
+    // مهلت امانت: 14 روز
+    const dueDate = new Date(borrowDate);
+    dueDate.setDate(dueDate.getDate() + 14);
+
+    let statusText = "در مهلت";
+    let statusColor = "green";
+
+    if (!returnDate && new Date() > dueDate) {
+      const delayDays =
+        Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24));
+      statusText = `تاخیر ${delayDays} روز`;
+      statusColor = "red";
+    }
+
+    if (returnDate) {
+      statusText = "بازگشت شده";
+      statusColor = "#555";
+    }
+
+    return `
+      <tr>
+        <td>${b.member}</td>
+        <td>${b.title}</td>
+        <td>${borrowDate.toLocaleDateString("fa-IR")}</td>
+        <td style="color:${statusColor};font-weight:bold;">
+          ${statusText}
+        </td>
+        <td>
+          ${
+            !returnDate
+              ? `<button class="btn-edit" onclick="returnBorrow(${b.id})">
+                   بازگشت
+                 </button>`
+              : "—"
+          }
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+async function returnBorrow(borrowId) {
+  if (!confirm("کتاب بازگردانده شود؟")) return;
+
+  const res = await fetch(`${API}/api/return/${borrowId}`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
+
+  const data = await res.json();
+  alert(data.message || data.error);
+
+  loadBooks();
+  loadDashboard();
+}
+
+
     /* -----------------------------
        اجرای اولیه
     -----------------------------*/
     loadBooks();
-    loadUsers();
-    loadDashboard();
-
+loadUsers();
+loadDashboard();
 </script>
 
 </body>

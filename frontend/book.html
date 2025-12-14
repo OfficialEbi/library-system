@@ -14,7 +14,6 @@
       padding: 0;
     }
 
-    /* پیام Pending */
     #pendingBox {
       display: none;
       background: #fff3cd;
@@ -29,7 +28,6 @@
       font-size: 15px;
     }
 
-    /* باکس اصلی */
     .book-container {
       width: 92%;
       margin: 25px auto 50px auto;
@@ -75,7 +73,6 @@
       cursor: not-allowed;
     }
 
-    /* کتاب‌های مرتبط */
     .related-books {
       margin-top: 35px;
     }
@@ -112,7 +109,6 @@
 
 <body>
 
-<!-- ========================= HEADER ========================= -->
 <header>
   <div class="container">
     <h1>📘 کتابخانه دانشگاه ابن‌حسام</h1>
@@ -135,7 +131,6 @@
       <div id="userMenu" class="user-menu" style="display:none;">
         <p id="menuUserName"></p>
         <button id="menuProfile">پروفایل</button>
-        <button id="menuLogout">خروج</button>
       </div>
 
       <button title="تنظیمات">⚙️</button>
@@ -143,16 +138,17 @@
   </div>
 </header>
 
-<!-- پیام کاربر Pending -->
-<div id="pendingBox">حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.</div>
+<div id="pendingBox">
+  حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.
+</div>
 
-<!-- ========================= MAIN CONTENT ========================= -->
 <div class="book-container">
 
   <h2 id="bookTitle">در حال بارگذاری...</h2>
 
   <div class="book-box">
-    <img id="bookImg" class="book-img" src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
+    <img id="bookImg" class="book-img"
+         src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
 
     <div class="book-info">
       <p><strong>نویسنده:</strong> <span id="bookAuthor"></span></p>
@@ -171,7 +167,6 @@
 
 </div>
 
-<!-- ========================= FOOTER ========================= -->
 <footer>
   <div class="footer-container">
     <div class="footer-col">
@@ -198,18 +193,17 @@
   <p class="copy">کلیه حقوق این سامانه محفوظ است.</p>
 </footer>
 
-
-<!-- ========================= JAVASCRIPT ========================= -->
 <script>
 const API = "http://localhost:3000";
 const params = new URLSearchParams(window.location.search);
 const bookId = params.get("id");
 
+const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 const isPending = user.role === "pending";
 const isMember  = user.role === "member";
 
-/* هدر – نمایش یوزر */
+/* هدر */
 function initHeader() {
   if (user?.name) {
     userNameDisplay.textContent = user.name;
@@ -221,19 +215,19 @@ function initHeader() {
       window.location.href = "member-panel.html";
     };
 
-    menuLogout.onclick = logoutBtn.onclick = () => {
+    logoutBtn.onclick = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "index.html";
     };
 
     userNameDisplay.onclick = () => {
-      userMenu.style.display = userMenu.style.display === "none" ? "block" : "none";
+      userMenu.style.display =
+        userMenu.style.display === "none" ? "block" : "none";
     };
   }
 }
 
-/* پیام Pending */
 if (isPending) {
   pendingBox.style.display = "block";
 }
@@ -255,38 +249,64 @@ async function loadBook() {
   bookCategory.textContent = book.category ?? "—";
   bookCopies.textContent = book.available_copies;
 
-  // کنترل Borrow
+  // Borrow واقعی
   if (isPending) {
     borrowBtn.classList.add("disabled");
     borrowBtn.onclick = () =>
       alert("پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.");
   } else {
-    borrowBtn.onclick = () =>
-      alert("در مرحله Borrow این دکمه کامل فعال می‌شود.");
+    borrowBtn.onclick = () => borrowBook(book.id);
   }
 
-  // کتاب‌های مرتبط
   const related = books.filter(
     (b) => b.category === book.category && b.id != book.id
   );
 
   relatedGrid.innerHTML = related.length
-    ? related
-        .map(
-          (b) => `
-      <div class="related-item" onclick="location.href='book.html?id=${b.id}'">
-        <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
-        <p>${b.title}</p>
-      </div>
-    `
-        )
-        .join("")
+    ? related.map(b => `
+        <div class="related-item"
+             onclick="location.href='book.html?id=${b.id}'">
+          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
+          <p>${b.title}</p>
+        </div>
+      `).join("")
     : "<p>کتاب مشابهی یافت نشد.</p>";
+}
+
+/* Borrow */
+async function borrowBook(id) {
+  if (!token) {
+    alert("برای امانت گرفتن ابتدا وارد حساب کاربری شوید");
+    return;
+  }
+
+  if (!isMember) {
+    alert("حساب شما هنوز توسط مدیر تایید نشده است");
+    return;
+  }
+
+  const res = await fetch(`${API}/api/borrow`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ book_id: id })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "خطا در امانت گرفتن کتاب");
+    return;
+  }
+
+  alert(data.message || "کتاب با موفقیت امانت گرفته شد");
+  loadBook(); // بروزرسانی موجودی
 }
 
 initHeader();
 loadBook();
-
 </script>
 
 </body>

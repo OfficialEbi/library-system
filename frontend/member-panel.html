@@ -6,203 +6,257 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
+    :root {
+      --primary-color: #1a2b4b;
+      --secondary-color: #f0f4f8;
+      --accent-color: #4CAF50;
+      --danger-color: #e6525a;
+    }
+    
     body {
-      background: #f4f7fb;
+      background: var(--secondary-color);
       direction: rtl;
       margin: 0;
       font-family: "Vazirmatn", sans-serif;
+      line-height: 1.6;
     }
 
     .container-panel {
+      max-width: 900px;
       width: 92%;
-      margin: 30px auto;
+      margin: 40px auto;
       background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     h2 {
-      color: #1f3c88;
-      margin-bottom: 25px;
+      color: var(--primary-color);
+      margin-bottom: 30px;
       text-align: center;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      font-weight: 700;
     }
 
-    /* پیام pending */
+    h3 {
+      color: var(--primary-color);
+      border-right: 4px solid var(--accent-color);
+      padding-right: 10px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
     .pending-msg {
-      background: #fff3cd;
-      border: 1px solid #ffeeba;
+      background: #fff8e1;
+      border: 1px solid #ffecb3;
       padding: 18px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       color: #7f6500;
-      margin-bottom: 25px;
+      margin-bottom: 30px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 600;
     }
 
-    /* فرم پروفایل */
     .profile-box {
-      padding: 20px;
-      border-radius: 10px;
-      background: #f9f9f9;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 25px;
+      border-radius: 12px;
+      background: #fcfcfc;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       margin-bottom: 30px;
+      border: 1px solid #eee;
+    }
+
+    .profile-box label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+      font-weight: 500;
     }
 
     .profile-box input {
-      width: 95%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
     }
 
-    .profile-box button {
-      background: #1f3c88;
-      color: white;
-      padding: 8px 18px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    /* جدول امانت‌ها */
     table {
       width: 100%;
-      background: white;
-      border-collapse: collapse;
-      margin-top: 10px;
-      border-radius: 10px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 15px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      background: white;
     }
 
     th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-      font-size: 14px;
+      padding: 15px 12px;
+      text-align: right;
+      font-size: 15px;
     }
 
     th {
-      background: #1f3c88;
+      background: var(--primary-color);
       color: white;
     }
 
-    .logout-btn {
-      margin-top: 25px;
+    tr:nth-child(even) {
+      background-color: #f7f9fb;
+    }
+
+    .home-btn {
       display: inline-block;
-      background: #d9534f;
+      text-decoration: none;
+      background: #777;
       color: white;
-      padding: 10px 18px;
-      border-radius: 6px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 25px;
+    }
+
+    .logout-btn {
+      margin-top: 15px;
+      display: block;
+      width: 100%;
+      background: var(--danger-color);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
       cursor: pointer;
       border: none;
+      font-size: 16px;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container-panel">
-    
-    <h2>📘 داشبورد کاربر</h2>
+<div class="container-panel">
+  <h2>📘 داشبورد کاربر</h2>
 
-    <!-- پیام Pending -->
-    <div id="pendingMsg" class="pending-msg" style="display:none;">
-      حساب شما هنوز توسط مدیر تایید نشده است.<br>
-      لطفاً منتظر تایید بمانید.
-    </div>
-
-    <!-- اطلاعات پروفایل -->
-    <div class="profile-box">
-      <h3 style="color:#1f3c88;">👤 اطلاعات پروفایل</h3>
-<br>
-
-      <label>نام:</label>
-      <br>
-
-      <input id="nameField" type="text">
-<br>
-
-      <label>ایمیل (غیرقابل‌ویرایش):</label>
-      <input id="emailField" type="text" disabled>
-<br>
-      <label>رمز عبور جدید:</label>
-      <input id="passwordField" type="password" placeholder="خالی بگذارید اگر نمی‌خواهید تغییر دهید">
-<br>
-
-      <label>تاریخ انقضا اکانت:</label>
-      <input id="expireField" type="text" disabled value="1404/01/01 (نمونه)" />
-<br>
-
-      <button onclick="updateProfile()">ذخیره تغییرات</button>
-    </div>
-
-    <!-- لیست امانت‌ها -->
-    <h3 style="color:#1f3c88;">🔁 امانت‌های شما</h3>
-
-    <table>
-      <thead>
-        <tr>
-          <th>کتاب</th>
-          <th>تاریخ امانت</th>
-          <th>تاریخ بازگشت</th>
-        </tr>
-      </thead>
-      <tbody id="borrowTable">
-        <tr><td colspan="3">سیستم امانت در مرحله بعد اضافه می‌شود.</td></tr>
-      </tbody>
-    </table>
-
-    <button class="logout-btn" onclick="logout()">🚪 خروج</button>
+  <div id="pendingMsg" class="pending-msg" style="display:none;">
+    حساب شما هنوز توسط مدیر تایید نشده است.
   </div>
 
+  <div class="profile-box">
+    <h3>👤 اطلاعات پروفایل</h3>
+
+    <label>نام:</label>
+    <input id="nameField" type="text">
+
+    <label>ایمیل:</label>
+    <input id="emailField" type="text" disabled>
+
+    <label>رمز عبور جدید:</label>
+    <input id="passwordField" type="password">
+
+    <label>تاریخ انقضا:</label>
+    <input id="expireField" type="text" disabled value="1404/01/01 (نمونه)">
+
+    <button onclick="updateProfile()">ذخیره تغییرات</button>
+  </div>
+
+  <h3>🔁 امانت‌های شما</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>کتاب</th>
+        <th>تاریخ امانت</th>
+        <th>تاریخ بازگشت</th>
+      </tr>
+    </thead>
+    <tbody id="borrowTable">
+      <tr><td colspan="3">در حال بارگذاری...</td></tr>
+    </tbody>
+  </table>
+
+  <a href="index.html" class="home-btn">📚 بازگشت به صفحه اصلی</a>
+  <button class="logout-btn" onclick="logout()">🚪 خروج</button>
+</div>
+
 <script>
-  const API = "http://localhost:3000";
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+const API = "http://localhost:3000";
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  /* دسترسی */
-  if (!token || !user) {
-    window.location.href = "index.html";
-  }
+if (!token || !user) location.href = "index.html";
+if (user.role === "admin") location.href = "admin-panel.html";
 
-  if (user.role === "admin") {
-    window.location.href = "admin-panel.html";
-  }
+if (user.role === "pending") {
+  pendingMsg.style.display = "block";
+}
 
-  /* اگر Pending بود پیام را نشان بده */
-  if (user.role === "pending") {
-    document.getElementById("pendingMsg").style.display = "block";
-  }
+nameField.value = user.name;
+emailField.value = user.email;
 
-  /* پر کردن فرم پروفایل */
-  document.getElementById("nameField").value = user.name;
-  document.getElementById("emailField").value = user.email;
+/* 🔁 امانت‌های کاربر */
+async function loadMyBorrows() {
+  const tbody = document.getElementById("borrowTable");
 
-  /* دکمه ذخیره تغییرات */
-  async function updateProfile() {
-    const newName = nameField.value.trim();
-    const newPassword = passwordField.value.trim();
+  try {
+    const res = await fetch(`${API}/api/my-borrows`, {
+      headers: { Authorization: "Bearer " + token }
+    });
 
-    if (!newName) {
-      alert("نام نمی‌تواند خالی باشد.");
+    const data = await res.json();
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="3">امانتی ثبت نشده است</td></tr>`;
       return;
     }
 
-    // این فقط UI است — API ویرایش پروفایل را در مرحله Borrow تکمیل می‌کنیم
-    alert("ذخیره شد (در مرحله بعد API کامل می‌شود)");
-  }
+    tbody.innerHTML = data.map(b => `
+      <tr>
+        <td>${b.title}</td>
+        <td>${new Date(b.borrow_date).toLocaleDateString("fa-IR")}</td>
+        <td>${b.return_date ? new Date(b.return_date).toLocaleDateString("fa-IR") : "—"}</td>
+      </tr>
+    `).join("");
 
-  /* خروج */
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "index.html";
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="3">خطا در دریافت اطلاعات</td></tr>`;
   }
+}
+
+async function updateProfile() {
+  const newName = nameField.value.trim();
+  const newPassword = passwordField.value.trim();
+
+  if (!newName) return alert("نام نمی‌تواند خالی باشد");
+
+  await fetch(`${API}/api/profile`, {
+    method: "PUT",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name: newName, password: newPassword })
+  });
+
+  user.name = newName;
+  localStorage.setItem("user", JSON.stringify(user));
+  alert("ذخیره شد");
+}
+
+function logout() {
+  localStorage.clear();
+  location.href = "index.html";
+}
+
+loadMyBorrows();
 </script>
 
 </body>

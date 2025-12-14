@@ -30,7 +30,6 @@
         <div id="userMenu" class="user-menu" style="display:none;">
           <p id="menuUserName">نام کاربر</p>
           <button id="menuProfile">پروفایل</button>
-          <button id="menuLogout">خروج</button>
         </div>
 
         <button title="تنظیمات">⚙️</button>
@@ -287,7 +286,7 @@ async function loadBooks() {
 
       ${
         pending
-        ? `<button class="btn-borrow disabled" 
+        ? `<button class="btn-borrow disabled"
              style="background:#999;cursor:not-allowed;"
              onclick="alert('پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.')">
              امانت
@@ -314,11 +313,40 @@ function showBookDetails(id) {
   window.location.href = `book.html?id=${id}`;
 }
 
-/* Borrow — پیاده‌سازی بعدی */
-function borrowBook(id) {
-  alert("--.");
-}
+/* ------------------- Borrow — پیاده‌سازی نهایی ------------------- */
+async function borrowBook(id) {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+  if (!token) {
+    alert("برای امانت گرفتن ابتدا وارد حساب کاربری شوید");
+    return;
+  }
+
+  if (user.role !== "member") {
+    alert("حساب شما هنوز توسط مدیر تایید نشده است");
+    return;
+  }
+
+  const res = await fetch(`${API}/api/borrow`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ book_id: id })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "خطا در امانت گرفتن کتاب");
+    return;
+  }
+
+  alert(data.message || "کتاب با موفقیت امانت گرفته شد");
+  loadBooks(); // ریفرش موجودی
+}
 
 /* ------------------- خروج ------------------- */
 logoutBtn.onclick = () => {
@@ -346,7 +374,6 @@ document.getElementById("searchBtn").onclick = () => {
   );
   renderBooks(filtered);
 };
-
 
 function renderBooks(list) {
   const grid = document.getElementById("bookGrid");
