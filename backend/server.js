@@ -316,6 +316,210 @@ async function init() {
       }
     });
 
+    // ============================
+    app.put("/api/profile", auth, async (req, res) => {
+      const { name, password } = req.body;
+
+      if (!name || name.trim() === "") {
+        return res.status(400).json({ error: "نام الزامی است" });
+      }
+
+      if (req.user.role === "admin") {
+        // این مسیر نباید برای ادمین‌ها استفاده شود
+        // فعلاً دست نمی‌زنیم تا معماری شما لطمه نخورد.
+      }
+
+      try {
+        if (password && password.trim() !== "") {
+          const hashed = await bcrypt.hash(password, 10);
+          await pool.query("UPDATE users SET name=?, password=? WHERE id=?", [
+            name,
+            hashed,
+            req.user.id,
+          ]);
+        } else {
+          await pool.query("UPDATE users SET name=? WHERE id=?", [
+            name,
+            req.user.id,
+          ]);
+        }
+
+        res.json({ message: "پروفایل با موفقیت بروزرسانی شد" });
+      } catch (err) {
+        console.error("Error updating profile:", err);
+        res.status(500).json({ error: "خطا در بروزرسانی پروفایل" });
+      }
+    });
+
+    // =========================================================
+    // ✅ جلسه ۸: Borrow / Return (فقط اضافه شده — حذف نشده)
+    // =========================================================
+
+    // --------------------------------------
+    // 🔁 Borrow Book (Member only)
+    // --------------------------------------
+    app.post("/api/borrow", auth, async (req, res) => {
+      const { book_id } = req.body;
+
+      // فقط member (اکانت تایید شده)
+      if (req.user.role !== "member") {
+        return res.status(403).json({ error: "حساب شما هنوز تایید نشده است" });
+      }
+
+      try {
+        // بررسی موجودی کتاب
+        const [[book]] = await pool.query(
+          "SELECT id, available_copies FROM books WHERE id=?",
+          [book_id]
+        );
+
+        if (!book) return res.status(404).json({ error: "کتاب یافت نشد" });
+
+        if (book.available_copies <= 0) {
+          return res.status(400).json({ error: "موجودی کتاب تمام شده است" });
+        }
+
+        // محدودیت ۳ امانت فعال
+        const [[cnt]] = await pool.query(
+          "SELECT COUNT(*) AS count FROM borrows WHERE member_id=? AND status='borrowed'",
+          [req.user.id]
+        );
+
+        if (cnt.count >= 3) {
+          return res
+            .status(400)
+            .json({ error: "حداکثر ۳ کتاب می‌توانید امانت بگیرید" });
+        }
+
+        // ثبت امانت
+        await pool.query(
+          "INSERT INTO borrows (book_id, member_id, borrow_date, status) VALUES (?, ?, NOW(), 'borrowed')",
+          [book_id, req.user.id]
+        );
+
+        // کاهش موجودی
+        await pool.query(
+          "UPDATE books SET available_copies = available_copies - 1 WHERE id=?",
+          [book_id]
+        );
+
+        res.json({ message: "کتاب با موفقیت امانت گرفته شد" });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "خطا در امانت گرفتن کتاب" });
+      }
+    });
+
+    // --------------------------------------
+    // 📘 My Borrows (Member) - برای member-panel
+    // --------------------------------------
+    app.get("/api/my-borrows", auth, async (req, res) => {
+      if (req.user.role !== "member") {
+        return res.status(403).json({ error: "دسترسی غیرمجاز" });
+      }
+
+      try {
+        const [rows] = await pool.query(
+          `SELECT b.id, bk.title, b.borrow_date, b.return_date, b.status
+           FROM borrows b
+           JOIN books bk ON bk.id = b.book_id
+           WHERE b.member_id = ?
+           ORDER BY b.borrow_date DESC`,
+          [req.user.id]
+        );
+
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "خطا در دریافت امانت‌ها" });
+      }
+    });
+
+    // --------------------------------------
+    // 📋 Active Borrows (Admin) - برای admin-panel
+    // --------------------------------------
+    app.get("/api/borrows/active", auth, admin, async (req, res) => {
+      try {
+        const [rows] = await pool.query(
+          `SELECT b.id, u.name AS member, bk.title, b.borrow_date
+           FROM borrows b
+           JOIN users u ON u.id = b.member_id
+           JOIN books bk ON bk.id = b.book_id
+           WHERE b.status='borrowed'
+           ORDER BY b.borrow_date DESC`
+        );
+        res.json(rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "خطا در دریافت امانت‌های فعال" });
+      }
+    });
+
+    // --------------------------------------
+    // 🔄 Return Book (Admin)
+    // --------------------------------------
+    app.post("/api/return/:borrowId", auth, admin, async (req, res) => {
+      const { borrowId } = req.params;
+
+      try {
+        const [[borrow]] = await pool.query(
+          "SELECT book_id, status FROM borrows WHERE id=?",
+          [borrowId]
+        );
+
+        if (!borrow) return res.status(404).json({ error: "امانت یافت نشد" });
+
+        if (borrow.status !== "borrowed") {
+          return res
+            .status(400)
+            .json({ error: "این امانت قبلاً بازگردانده شده است" });
+        }
+
+        // تغییر وضعیت + ثبت تاریخ بازگشت
+        await pool.query(
+          "UPDATE borrows SET status='returned', return_date=NOW() WHERE id=?",
+          [borrowId]
+        );
+
+        // افزایش موجودی
+        await pool.query(
+          "UPDATE books SET available_copies = available_copies + 1 WHERE id=?",
+          [borrow.book_id]
+        );
+
+        res.json({ message: "کتاب با موفقیت بازگردانده شد" });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "خطا در بازگشت کتاب" });
+      }
+    });
+
+    // سوابق امانت‌های تکمیل‌شده (برگشتی)
+// سوابق امانت‌های تکمیل‌شده (برگشتی)
+app.get("/api/borrows/history", auth, admin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT
+        b.id,
+        u.name AS member,
+        bk.title,
+        b.borrow_date,
+        b.return_date
+      FROM borrows b
+      JOIN users u ON b.member_id = u.id
+      JOIN books bk ON b.book_id = bk.id
+      WHERE b.status = 'returned'
+      ORDER BY b.return_date DESC
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Error loading borrow history:", err);
+    res.status(500).json({ error: "خطا در دریافت سوابق امانت‌ها" });
+  }
+});
+
+
     // --------------------------------------
     // 🚀 اجرای سرور
     // --------------------------------------
@@ -323,7 +527,6 @@ async function init() {
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
-
   } catch (err) {
     console.log("❌ Database connection failed:", err);
   }
