@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
 
 dotenv.config();
 
@@ -71,7 +73,82 @@ async function init() {
         res.status(500).json({ error: "خطا در دریافت کتاب‌ها" });
       }
     });
+//-----------------------عکس برای کتاب--------
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/books");
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  }
+});
 
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+});
+app.use("/uploads", express.static("uploads"));
+// =========================
+// ویرایش کتاب + عکس اختیاری
+// =========================
+app.put(
+  "/api/books/:id",
+  auth,
+  admin,
+  upload.single("image"),
+  async (req, res) => {
+
+    const {
+      title,
+      author,
+      category,
+      isbn,
+      publication_year,
+      total_copies,
+      shelf_number
+    } = req.body;
+
+    // اگر عکس جدید ارسال شده باشد
+    const imagePath = req.file
+      ? `/uploads/books/${req.file.filename}`
+      : null;
+
+    // ساخت کوئری داینامیک
+    let sql = `
+      UPDATE books SET
+        title=?,
+        author=?,
+        category=?,
+        isbn=?,
+        publication_year=?,
+        total_copies=?,
+        shelf_number=?
+        ${imagePath ? ", image=?" : ""}
+      WHERE id=?
+    `;
+
+    const params = [
+      title,
+      author,
+      category,
+      isbn,
+      publication_year,
+      total_copies,
+      shelf_number
+    ];
+
+    if (imagePath) params.push(imagePath);
+    params.push(req.params.id);
+
+    await pool.query(sql, params);
+
+    res.json({ message: "کتاب با موفقیت ویرایش شد" });
+  }
+);
+
+
+//----------------//
     // --------------------------------------
     // 📘 CRUD کتاب‌ها (فقط برای ادمین)
     // --------------------------------------
@@ -87,20 +164,69 @@ async function init() {
     });
 
     // افزودن کتاب
-    app.post("/api/books", auth, admin, async (req, res) => {
-      const { title, author, category, publication_year, available_copies } =
-        req.body;
+app.post(
+  "/api/books",
+  auth,
+  admin,
+  upload.single("image"),   
+  async (req, res) => {
+    try {
+      const { 
+        title, 
+        author, 
+        category, 
+        isbn, 
+        publication_year, 
+        total_copies, 
+        shelf_number 
+      } = req.body;
 
-      try {
-        await pool.query(
-          "INSERT INTO books (title, author, category, publication_year, available_copies) VALUES (?, ?, ?, ?, ?)",
-          [title, author, category, publication_year, available_copies]
-        );
-        res.json({ message: "کتاب با موفقیت اضافه شد" });
-      } catch (err) {
-        res.status(500).json({ error: "خطا در افزودن کتاب" });
+      // اعتبارسنجی اولیه
+      if (!title || !author || !publication_year || !total_copies) {
+        return res.status(400).json({
+          error: "لطفاً فیلدهای الزامی (عنوان، نویسنده، سال، تعداد کل) را پر کنید."
+        });
       }
-    });
+
+      // موجودی اولیه
+      const available_copies = parseInt(total_copies);
+
+      // مسیر تصویر (اختیاری)
+      const imagePath = req.file
+        ? `/uploads/books/${req.file.filename}`
+        : null;
+
+      const [result] = await pool.query(
+        `INSERT INTO books 
+         (title, author, category, isbn, publication_year, total_copies, available_copies, shelf_number, image)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          title,
+          author,
+          category,
+          isbn,
+          parseInt(publication_year),
+          parseInt(total_copies),
+          available_copies,
+          shelf_number,
+          imagePath
+        ]
+      );
+
+      res.status(201).json({
+        id: result.insertId,
+        message: "کتاب با موفقیت اضافه شد."
+      });
+
+    } catch (err) {
+      console.error("Error adding book:", err);
+      res.status(500).json({
+        error: "خطای سرور در افزودن کتاب."
+      });
+    }
+  }
+);
+
 
     // حذف کتاب
     app.delete("/api/books/:id", auth, admin, async (req, res) => {
@@ -113,28 +239,83 @@ async function init() {
     });
 
     // ویرایش کتاب
-    app.put("/api/books/:id", auth, admin, async (req, res) => {
-      const { title, author, category, publication_year, available_copies } =
-        req.body;
+    // server.js - مسیر PUT اصلاح شده
+app.put("/api/books/:id", auth, admin, async (req, res) => {
+    const bookId = req.params.id;
+    // دریافت تمام فیلدها از کلاینت
+    const { 
+        title, 
+        author, 
+        category, 
+        isbn, 
+        publication_year, 
+        total_copies, 
+        shelf_number 
+    } = req.body;
 
-      try {
-        await pool.query(
-          "UPDATE books SET title=?, author=?, category=?, publication_year=?, available_copies=? WHERE id=?",
-          [
-            title,
-            author,
-            category,
-            publication_year,
-            available_copies,
-            req.params.id,
-          ]
+    try {
+        // 1. بازیابی اطلاعات فعلی برای محاسبه available_copies
+        const [currentBookRows] = await pool.query("SELECT total_copies, available_copies FROM books WHERE id = ?", [bookId]);
+        if (currentBookRows.length === 0) {
+            return res.status(404).json({ error: "کتابی با این شناسه پیدا نشد." });
+        }
+        const currentBook = currentBookRows[0];
+        
+        // 2. محاسبه موجودی جدید:
+        const borrowedCopies = currentBook.total_copies - currentBook.available_copies;
+        const newTotalCopies = parseInt(total_copies);
+        let newAvailableCopies = newTotalCopies - borrowedCopies;
+        
+        // جلوگیری از موجودی کمتر از تعداد امانت رفته
+        if (newAvailableCopies < 0) {
+            return res.status(400).json({ error: `تعداد کل نسخه‌ها (${newTotalCopies}) نمی‌تواند کمتر از تعداد امانت داده شده (${borrowedCopies} عدد) باشد.` });
+        }
+        
+        // 3. اجرای کوئری UPDATE
+        const [result] = await pool.query(
+            `UPDATE books SET 
+                title=?, 
+                author=?, 
+                category=?, 
+                isbn=?, 
+                publication_year=?, 
+                total_copies=?, 
+                available_copies=?, 
+                shelf_number=? 
+            WHERE id=?`,
+            [
+                title,
+                author,
+                category,
+                isbn,
+                parseInt(publication_year),
+                newTotalCopies,
+                newAvailableCopies, // موجودی محاسبه شده
+                shelf_number,
+                bookId,
+            ]
         );
-        res.json({ message: "کتاب ویرایش شد" });
-      } catch (err) {
-        res.status(500).json({ error: "خطا در ویرایش" });
-      }
-    });
+        
+        if (result.affectedRows === 0) {
+           return res.status(404).json({ error: "کتاب برای ویرایش پیدا نشد." });
+        }
 
+        res.json({ message: "کتاب با موفقیت ویرایش شد" });
+    } catch (err) {
+        console.error("خطای ویرایش سرور:", err);
+        res.status(500).json({ error: "خطا در ویرایش: لطفاً لاگ سرور را بررسی کنید (SQL Error)." });
+    }
+});
+// دریافت لیست کامل کتاب‌ها (برای پنل ادمین)
+app.get("/api/admin/books", auth, admin, async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM books ORDER BY id DESC");
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching admin books list:", err);
+    res.status(500).json({ error: "خطا در بارگذاری لیست کتاب‌ها" });
+  }
+});
     // --------------------------------------
     // 👤 مدیریت کاربران
     // --------------------------------------
@@ -326,7 +507,6 @@ async function init() {
 
       if (req.user.role === "admin") {
         // این مسیر نباید برای ادمین‌ها استفاده شود
-        // فعلاً دست نمی‌زنیم تا معماری شما لطمه نخورد.
       }
 
       try {
@@ -352,12 +532,7 @@ async function init() {
     });
 
     // =========================================================
-    // ✅ جلسه ۸: Borrow / Return (فقط اضافه شده — حذف نشده)
-    // =========================================================
-
-    // --------------------------------------
     // 🔁 Borrow Book (Member only)
-    // --------------------------------------
     app.post("/api/borrow", auth, async (req, res) => {
       const { book_id } = req.body;
 
@@ -494,7 +669,6 @@ async function init() {
       }
     });
 
-    // سوابق امانت‌های تکمیل‌شده (برگشتی)
 // سوابق امانت‌های تکمیل‌شده (برگشتی)
 app.get("/api/borrows/history", auth, admin, async (req, res) => {
   try {
@@ -518,6 +692,31 @@ app.get("/api/borrows/history", auth, admin, async (req, res) => {
     res.status(500).json({ error: "خطا در دریافت سوابق امانت‌ها" });
   }
 });
+// 🔍 جست‌وجوی زنده کتاب‌ها (Autocomplete)
+app.get("/api/search/books", async (req, res) => {
+  const q = req.query.q;
+  if (!q || q.trim().length < 2) {
+    return res.json([]);
+  }
+
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, title, author 
+       FROM books
+       WHERE title LIKE ? 
+          OR author LIKE ? 
+          OR isbn LIKE ?
+       LIMIT 8`,
+      [`%${q}%`, `%${q}%`, `%${q}%`]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "خطا در جست‌وجو" });
+  }
+});
+
 
 
     // --------------------------------------
