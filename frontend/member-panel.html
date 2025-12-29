@@ -2,103 +2,256 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <title>📘 داشبورد کاربر</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>📘 پنل کاربری</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <style>
+    /* --- متغیرها --- */
     :root {
-      --primary-color: #1a2b4b;
-      --secondary-color: #f0f4f8;
-      --accent-color: #4CAF50;
-      --danger-color: #e6525a;
+      --primary-color: #1a2b4b; /* سرمه‌ای تیره (برای سایدبار) */
+      --secondary-color: #f0f4f8; /* خاکستری روشن بکگراند اصلی */
+      --accent-color: #007bff; /* آبی برای تأکید و فعال بودن */
+      --success-color: #28a745; 
+      --danger-color: #dc3545; 
+      --card-bg: white;
+      --border-radius-lg: 18px;
+      --border-radius-md: 10px;
     }
     
     body {
-      background: var(--secondary-color);
       direction: rtl;
       margin: 0;
       font-family: "Vazirmatn", sans-serif;
       line-height: 1.6;
+      background: var(--secondary-color);
     }
 
-    .container-panel {
-      max-width: 900px;
-      width: 92%;
-      margin: 40px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    /* --- طرح‌بندی اصلی داشبورد (Flexbox) --- */
+    .dashboard-wrapper {
+      display: flex; 
+      min-height: 100vh;
+      background: var(--secondary-color);
     }
+
+    /* --- 1. سایدبار (منوی کناری) --- */
+    .sidebar {
+      width: 260px; 
+      background: var(--primary-color); 
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+      flex-shrink: 0; 
+      padding: 25px 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .sidebar-header {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-header .material-icons-outlined {
+      margin-left: 10px;
+      color: var(--accent-color);
+      font-size: 28px;
+    }
+
+    .sidebar-nav {
+      flex-grow: 1; 
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: #c9d0d9; 
+      padding: 15px 25px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-right: 4px solid var(--accent-color); 
+    }
+
+    .sidebar-nav a .material-icons-outlined {
+      margin-left: 10px;
+      font-size: 20px;
+    }
+    
+    /* --- 2. محتوای اصلی --- */
+    .main-content {
+      flex-grow: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    /* استایل کارت اصلی (container-panel) */
+    .container-panel {
+      max-width: 900px; 
+      width: 100%;
+      margin: 0 auto; 
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Content Section Toggle --- */
+    .content-section {
+        display: none; /* مخفی کردن اولیه همه سکشن‌ها */
+    }
+    .content-section.active {
+        display: block; /* نمایش سکشن فعال */
+    }
+    
+    /* --- استایل‌های داخلی کارت --- */
 
     h2 {
       color: var(--primary-color);
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       text-align: center;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 10px;
       font-weight: 700;
+      font-size: 28px;
     }
 
     h3 {
+      display: flex;
+      align-items: center;
       color: var(--primary-color);
-      border-right: 4px solid var(--accent-color);
-      padding-right: 10px;
-      margin-top: 30px;
-      margin-bottom: 15px;
+      margin-top: 35px;
+      margin-bottom: 20px;
       font-weight: 600;
+      font-size: 22px;
+    }
+
+    h3 .material-icons-outlined {
+      margin-left: 8px;
+      color: var(--accent-color);
+      font-size: 26px;
     }
 
     .pending-msg {
-      background: #fff8e1;
-      border: 1px solid #ffecb3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff3cd; 
+      border: 1px solid #ffeeba;
       padding: 18px;
-      border-radius: 12px;
+      border-radius: var(--border-radius-md);
       font-size: 16px;
-      color: #7f6500;
+      color: #856404; 
       margin-bottom: 30px;
-      text-align: center;
       font-weight: 600;
+      box-shadow: 0 4px 10px rgba(255, 230, 0, 0.1);
+    }
+
+    .pending-msg .material-icons-outlined {
+      margin-left: 10px;
+      font-size: 24px;
     }
 
     .profile-box {
-      padding: 25px;
-      border-radius: 12px;
+      padding: 30px;
+      border-radius: var(--border-radius-md);
       background: #fcfcfc;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
       margin-bottom: 30px;
-      border: 1px solid #eee;
+      border: 1px solid #eef1f4;
     }
 
     .profile-box label {
       display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: var(--primary-color);
+      margin-top: 18px;
+      margin-bottom: 8px;
+      color: #4a5568; 
       font-weight: 500;
+      font-size: 15px;
     }
 
     .profile-box input {
       width: 100%;
       padding: 12px 15px;
       border-radius: 8px;
-      border: 1px solid #ddd;
+      border: 1px solid #d4d8de;
       box-sizing: border-box;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      background-color: white;
     }
 
+    .profile-box input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      outline: none;
+    }
+
+    .profile-box input[disabled] {
+      background-color: #f5f5f5;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* --- Button Styles --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      border: none;
+      margin-top: 25px;
+      line-height: 1; 
+    }
+
+    .btn .material-icons-outlined {
+      font-size: 20px;
+      margin-left: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0056b3;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    }
+
+    /* --- Table Styles --- */
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
       margin-top: 15px;
-      border-radius: 12px;
+      border-radius: var(--border-radius-md);
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.07);
       background: white;
     }
 
     th, td {
-      padding: 15px 12px;
+      padding: 15px 18px;
       text-align: right;
       font-size: 15px;
     }
@@ -106,85 +259,148 @@
     th {
       background: var(--primary-color);
       color: white;
+      font-weight: 600;
     }
 
     tr:nth-child(even) {
       background-color: #f7f9fb;
     }
 
-    .home-btn {
-      display: inline-block;
-      text-decoration: none;
-      background: #777;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      margin-top: 25px;
+    tr:hover {
+      background-color: #e9ecef;
+      transition: background-color 0.2s;
+    }
+    
+    .borrow-returned {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+    .borrow-pending {
+      color: var(--danger-color);
+      font-weight: 500;
     }
 
-    .logout-btn {
-      margin-top: 15px;
-      display: block;
-      width: 100%;
-      background: var(--danger-color);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      border: none;
-      font-size: 16px;
-      font-weight: bold;
+    /* --- ریسپانسیو (برای موبایل) --- */
+    @media (max-width: 900px) {
+      .dashboard-wrapper {
+        flex-direction: column; 
+      }
+      .sidebar {
+        width: 100%; 
+        height: auto;
+        position: static;
+        padding: 15px 0;
+      }
+      .sidebar-nav {
+        display: flex;
+        flex-wrap: wrap; 
+        justify-content: space-around;
+      }
+      .sidebar-header {
+        display: none; 
+      }
+      .sidebar-nav a {
+        padding: 12px 10px;
+        flex-direction: column; 
+        flex-basis: 45%; /* کمی فضا برای هر لینک */
+        text-align: center;
+        border-right: none !important;
+      }
+      .sidebar-nav a .material-icons-outlined {
+        margin: 0 0 5px 0;
+      }
+      .main-content {
+        padding: 20px;
+      }
+      .container-panel {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="container-panel">
-  <h2>📘 داشبورد کاربر</h2>
+<div class="dashboard-wrapper">
+  
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <span class="material-icons-outlined">library_books</span>
+      کتابخانه من
+    </div>
+    
+    <div class="sidebar-nav">
+      <a id="nav-dashboard" onclick="switchSection('dashboard', this)" class="active">
+        <span class="material-icons-outlined">dashboard</span> داشبورد
+      </a>
+      
+      <a id="nav-settings" onclick="switchSection('settings', this)">
+        <span class="material-icons-outlined">settings</span> تنظیمات
+      </a>
+      
+      <div style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 50px;">
+        <a href="index.html"><span class="material-icons-outlined">home</span> صفحه اصلی</a>
+        <a href="#" onclick="logout()" style="color: #ff6b6b;"><span class="material-icons-outlined">logout</span> خروج</a>
+      </div>
+    </div>
+  </nav>
 
-  <div id="pendingMsg" class="pending-msg" style="display:none;">
-    حساب شما هنوز توسط مدیر تایید نشده است.
+  <div class="main-content">
+    <div class="container-panel">
+      
+      <div id="pendingMsg" class="pending-msg" style="display:none;">
+        <span class="material-icons-outlined">access_time</span>
+        حساب شما هنوز توسط مدیر تایید نشده است. لطفاً صبور باشید.
+      </div>
+
+      <div id="dashboard" class="content-section active">
+        <h2><span class="material-icons-outlined" style="font-size: 32px; margin-left: 10px;">menu_book</span> امانت‌های شما</h2>
+
+        <h3><span class="material-icons-outlined">history</span> تاریخچه امانت‌ها</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>کتاب</th>
+              <th>تاریخ امانت</th>
+              <th>تاریخ بازگشت</th>
+              <th>وضعیت</th>
+            </tr>
+          </thead>
+          <tbody id="borrowTable">
+            <tr><td colspan="4">در حال بارگذاری...</td></tr>
+          </tbody>
+        </table>
+        
+      </div>
+      
+      <div id="settings" class="content-section">
+        <h2><span class="material-icons-outlined" style="font-size: 32px; margin-left: 10px;">settings</span> تنظیمات پروفایل</h2>
+        
+        <div class="profile-box">
+          <h3><span class="material-icons-outlined">person</span> اطلاعات پروفایل</h3>
+
+          <label for="nameField">نام کامل:</label>
+          <input id="nameField" type="text" placeholder="نام خود را وارد کنید">
+
+          <label for="emailField">پست الکترونیک (ایمیل):</label>
+          <input id="emailField" type="text" disabled placeholder="ایمیل شما">
+
+          <label for="passwordField">رمز عبور جدید (برای تغییر):</label>
+          <input id="passwordField" type="password" placeholder="اگر نمی‌خواهید تغییر دهید، خالی بگذارید">
+
+          <label for="expireField">تاریخ انقضای عضویت:</label>
+          <input id="expireField" type="text" disabled value="1404/01/01 (نمونه)">
+
+          <button onclick="updateProfile()" class="btn btn-primary">
+            <span class="material-icons-outlined">save</span>
+            ذخیره تغییرات
+          </button>
+        </div>
+      </div>
+      
+    </div>
   </div>
-
-  <div class="profile-box">
-    <h3>👤 اطلاعات پروفایل</h3>
-
-    <label>نام:</label>
-    <input id="nameField" type="text">
-
-    <label>ایمیل:</label>
-    <input id="emailField" type="text" disabled>
-
-    <label>رمز عبور جدید:</label>
-    <input id="passwordField" type="password">
-
-    <label>تاریخ انقضا:</label>
-    <input id="expireField" type="text" disabled value="1404/01/01 (نمونه)">
-
-    <button onclick="updateProfile()">ذخیره تغییرات</button>
-  </div>
-
-  <h3>🔁 امانت‌های شما</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>کتاب</th>
-        <th>تاریخ امانت</th>
-        <th>تاریخ بازگشت</th>
-      </tr>
-    </thead>
-    <tbody id="borrowTable">
-      <tr><td colspan="3">در حال بارگذاری...</td></tr>
-    </tbody>
-  </table>
-
-  <a href="index.html" class="home-btn">📚 بازگشت به صفحه اصلی</a>
-  <button class="logout-btn" onclick="logout()">🚪 خروج</button>
 </div>
 
 <script>
@@ -192,15 +408,42 @@ const API = "http://localhost:3000";
 const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+// تعریف عناصر HTML برای استفاده آسان‌تر
+const pendingMsg = document.getElementById("pendingMsg");
+const nameField = document.getElementById("nameField");
+const emailField = document.getElementById("emailField");
+const passwordField = document.getElementById("passwordField");
+
+// بررسی اولیه وضعیت ورود
 if (!token || !user) location.href = "index.html";
 if (user.role === "admin") location.href = "admin-panel.html";
 
+// نمایش پیام در صورت نیاز
 if (user.role === "pending") {
-  pendingMsg.style.display = "block";
+  pendingMsg.style.display = "flex"; 
 }
 
+// پر کردن فیلدهای پروفایل
 nameField.value = user.name;
 emailField.value = user.email;
+
+/* --- منطق تغییر بخش‌های محتوا --- */
+function switchSection(sectionId, element) {
+    // حذف کلاس active از همه لینک‌های ناوبری
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+        link.classList.remove('active');
+    });
+    // افزودن کلاس active به لینک کلیک شده
+    element.classList.add('active');
+
+    // مخفی کردن همه سکشن‌ها
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    // نمایش سکشن مورد نظر
+    document.getElementById(sectionId).classList.add('active');
+}
+
 
 /* 🔁 امانت‌های کاربر */
 async function loadMyBorrows() {
@@ -214,20 +457,28 @@ async function loadMyBorrows() {
     const data = await res.json();
 
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="3">امانتی ثبت نشده است</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #777;">شما تاکنون امانتی ثبت نکرده‌اید.</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = data.map(b => `
-      <tr>
-        <td>${b.title}</td>
-        <td>${new Date(b.borrow_date).toLocaleDateString("fa-IR")}</td>
-        <td>${b.return_date ? new Date(b.return_date).toLocaleDateString("fa-IR") : "—"}</td>
-      </tr>
-    `).join("");
+    tbody.innerHTML = data.map(b => {
+      const isReturned = !!b.return_date;
+      const statusClass = isReturned ? "borrow-returned" : "borrow-pending";
+      const statusText = isReturned ? "بازگشت داده شده" : "در انتظار بازگشت";
+      const returnDateDisplay = b.return_date ? new Date(b.return_date).toLocaleDateString("fa-IR") : "—";
+
+      return `
+        <tr>
+          <td>${b.title}</td>
+          <td>${new Date(b.borrow_date).toLocaleDateString("fa-IR")}</td>
+          <td>${returnDateDisplay}</td>
+          <td class="${statusClass}">${statusText}</td>
+        </tr>
+      `;
+    }).join("");
 
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="3">خطا در دریافت اطلاعات</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger-color);">خطا در دریافت اطلاعات امانت‌ها</td></tr>`;
   }
 }
 
@@ -237,18 +488,26 @@ async function updateProfile() {
 
   if (!newName) return alert("نام نمی‌تواند خالی باشد");
 
-  await fetch(`${API}/api/profile`, {
-    method: "PUT",
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name: newName, password: newPassword })
-  });
+  try {
+    const res = await fetch(`${API}/api/profile`, {
+      method: "PUT",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name: newName, password: newPassword || undefined })
+    });
 
-  user.name = newName;
-  localStorage.setItem("user", JSON.stringify(user));
-  alert("ذخیره شد");
+    if (!res.ok) throw new Error("خطا در ذخیره سازی");
+
+    user.name = newName;
+    localStorage.setItem("user", JSON.stringify(user));
+    passwordField.value = ""; 
+    alert("تغییرات با موفقیت ذخیره شد!");
+
+  } catch (e) {
+    alert("خطا در ذخیره پروفایل: " + e.message);
+  }
 }
 
 function logout() {

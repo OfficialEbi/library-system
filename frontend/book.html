@@ -1,108 +1,402 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📘 اطلاعات کتاب</title>
-  <link rel="stylesheet" href="style.css">
-
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  
   <style>
-    body {
-      direction: rtl;
-      font-family: "Vazirmatn";
-      background: #f4f7fb;
-      margin: 0;
-      padding: 0;
+    /* ---------------------------------------------------
+       1. تنظیمات کلی و متغیرها (همانند Admin/Index Panel)
+    --------------------------------------------------- */
+    :root {
+      --primary-color: #2563eb;       /* آبی مدرن */
+      --secondary-color: #1e293b;     /* سرمه‌ای تیره */
+      --accent-color: #f59e0b;        /* نارنجی/طلایی */
+      --bg-color: #f3f4f6;            /* خاکستری خیلی روشن پس‌زمینه اصلی */
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --text-light: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 12px;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* سایه نرم و مدرن */
     }
 
+    * {
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      direction: rtl;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    h2, h3 {
+      color: var(--secondary-color);
+      font-weight: 700;
+    }
+
+    /* ---------------------------------------------------
+       2. Header و Navigation (یکسان با index.html)
+    --------------------------------------------------- */
+    header {
+      background: var(--secondary-color);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+
+    header nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+    }
+
+    header nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 10px 15px;
+      display: block;
+      transition: color 0.3s;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+    }
+
+    header nav a:hover {
+      color: white;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .header-icons {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+    }
+
+    .header-icons .user-name {
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        background: var(--primary-color);
+    }
+
+    #openAuth {
+      background: var(--accent-color);
+      color: var(--secondary-color);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    #openAuth:hover {
+      background: #e6910b;
+    }
+    #logoutBtn {
+        background: var(--danger);
+        color: white;
+        padding: 8px 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .user-menu {
+        position: absolute;
+        top: 45px;
+        left: 0; 
+        right: auto;
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 15px;
+        min-width: 150px;
+        z-index: 1001;
+        text-align: right;
+    }
+    .user-menu p {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+        color: var(--primary-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    .user-menu button {
+        background: var(--primary-color);
+        color: white;
+        width: 100%;
+        margin-top: 10px;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    /* دکمه تنظیمات را مخفی می‌کنیم */
+    .header-icons button[title="تنظیمات"] { display: none; }
+
+
+    /* ---------------------------------------------------
+       3. استایل بخش اطلاعات کتاب
+    --------------------------------------------------- */
     #pendingBox {
-      display: none;
       background: #fff3cd;
       color: #7f6500;
       border: 1px solid #ffeeba;
-      padding: 12px;
-      margin: 15px auto;
-      width: 92%;
-      border-radius: 8px;
+      padding: 15px;
+      margin: 25px auto;
+      max-width: 900px;
+      border-radius: var(--radius);
       text-align: center;
       font-weight: bold;
       font-size: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .book-container {
+      max-width: 900px;
       width: 92%;
-      margin: 25px auto 50px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin: 40px auto 60px auto;
+      background: var(--card-bg);
+      padding: 35px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border-right: 6px solid var(--primary-color); /* تاکید مدرن */
+    }
+    
+    .book-title-header {
+        font-size: 1.8rem;
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--secondary-color);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .book-box {
       display: flex;
       gap: 35px;
-      padding: 10px 0;
+      padding: 20px 0;
       flex-wrap: wrap;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 25px;
     }
 
     .book-img {
-      width: 230px;
-      height: 300px;
-      border-radius: 10px;
+      width: 200px; 
+      height: 250px;
+      min-width: 200px;
+      border-radius: var(--radius);
       background: #eee;
       object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .book-info {
+        flex-grow: 1;
     }
 
     .book-info p {
-      margin: 6px 0;
-      font-size: 16px;
+      margin: 12px 0;
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+    .book-info p strong {
+        color: var(--secondary-color);
+        margin-left: 5px;
     }
 
     .btn-primary {
-      background: #1f3c88;
+      background: var(--primary-color);
       color: white;
-      padding: 10px 18px;
+      padding: 12px 25px;
       border-radius: 8px;
       border: none;
       cursor: pointer;
-      margin-top: 12px;
-      font-size: 15px;
+      margin-top: 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover:not(.disabled) {
+        background: #1d4ed8;
     }
 
     .btn-primary.disabled {
-      background: #999;
+      background: var(--text-light);
       cursor: not-allowed;
+      color: #f3f4f6;
     }
-
-    .related-books {
-      margin-top: 35px;
+    
+    /* کتاب‌های مرتبط */
+    .related-books h3 {
+        color: var(--secondary-color);
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .related-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 20px;
-      margin-top: 15px;
     }
 
     .related-item {
-      background: white;
-      padding: 12px;
-      border-radius: 10px;
+      background: #f8fafc; 
+      padding: 15px 10px;
+      border-radius: var(--radius);
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.3s;
+      border: 1px solid #e2e8f0;
+      font-size: 0.9rem;
     }
 
     .related-item:hover {
-      transform: translateY(-3px);
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      border-color: var(--primary-color);
     }
 
     .related-item img {
-      width: 70px;
-      height: 70px;
+      width: 100px;
+      height: 120px;
       object-fit: cover;
-      margin-bottom: 10px;
+  border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .related-item p {
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    /* ---------------------------------------------------
+       4. Footer (یکسان با index.html)
+    --------------------------------------------------- */
+    footer {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 40px 20px 20px;
+      margin-top: 60px;
+    }
+
+    .footer-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .footer-col h3 {
+      color: white;
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-col ul a {
+      color: #cbd5e1;
+      text-decoration: none;
+      display: block;
+      padding: 5px 0;
+      transition: color 0.3s;
+    }
+
+    .footer-col ul a:hover {
+      color: var(--primary-color);
+    }
+
+    .copy {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      max-width: 1200px;
+      margin: 20px auto 0;
+    }
+
+    /* ---------------------------------------------------
+       5. Responsive Design
+    --------------------------------------------------- */
+    @media (max-width: 768px) {
+        .book-box {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+        }
+        .book-img {
+            width: 150px;
+            height: 200px;
+            min-width: 150px;
+        }
+        .book-container {
+            padding: 20px;
+            width: 100%;
+            margin-top: 20px;
+            border-right: none;
+            border-top: 6px solid var(--primary-color);
+        }
     }
   </style>
 </head>
@@ -111,86 +405,99 @@
 
 <header>
   <div class="container">
-    <h1>📘 کتابخانه دانشگاه ابن‌حسام</h1>
+    <h1><span class="material-icons-outlined" style="vertical-align: middle; margin-left: 8px; color: var(--accent-color);">auto_stories</span> کتابخانه دانشگاه ابن‌حسام</h1>
 
     <nav>
       <ul>
         <li><a href="index.html">خانه</a></li>
-        <li><a href="#">کتاب‌ها</a></li>
+        <li><a href="#" class="active">کتاب‌ها</a></li>
         <li><a href="#">درباره ما</a></li>
         <li><a href="#">تماس</a></li>
       </ul>
     </nav>
 
     <div class="header-icons">
-      <span id="userNameDisplay" class="user-name"></span>
+      <span id="userNameDisplay" class="user-name" style="display:none;"></span>
 
-      <button id="openAuth" title="ورود">ورود</button>
-      <button id="logoutBtn" style="display:none;" title="خروج">🚪</button>
+      <button id="openAuth" title="ورود">🔑 ورود</button>
+      <button id="logoutBtn" style="display:none;" title="خروج">🚪 خروج</button>
 
       <div id="userMenu" class="user-menu" style="display:none;">
         <p id="menuUserName"></p>
         <button id="menuProfile">پروفایل</button>
       </div>
-
-      <button title="تنظیمات">⚙️</button>
-    </div>
+      </div>
   </div>
 </header>
 
-<div id="pendingBox">
+<div id="pendingBox" style="display:none;">
   حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.
 </div>
 
 <div class="book-container">
 
-  <h2 id="bookTitle">در حال بارگذاری...</h2>
+  <h2 id="bookTitle" class="book-title-header">
+      <span class="material-icons-outlined" style="color:var(--primary-color); font-size: 2rem;">menu_book</span>
+      در حال بارگذاری...
+  </h2>
 
   <div class="book-box">
     <img id="bookImg" class="book-img"
-         src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
+         src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="تصویر کتاب">
 
     <div class="book-info">
       <p><strong>نویسنده:</strong> <span id="bookAuthor"></span></p>
       <p><strong>سال چاپ:</strong> <span id="bookYear"></span></p>
       <p><strong>دسته‌بندی:</strong> <span id="bookCategory"></span></p>
-      <p><strong>نسخه موجود:</strong> <span id="bookCopies"></span></p>
+      <p style="font-size: 1.1rem;">
+          <strong>نسخه موجود:</strong> 
+          <span id="bookCopies" style="font-weight: bold; color:var(--success);"></span>
+      </p>
 
-      <button id="borrowBtn" class="btn-primary">امانت گرفتن</button>
+      <button id="borrowBtn" class="btn-primary">
+          <span class="material-icons-outlined">shopping_cart_checkout</span>
+          امانت گرفتن
+      </button>
     </div>
   </div>
 
   <div class="related-books">
-    <h3 style="color:#1f3c88;">📚 کتاب‌های مرتبط</h3>
+    <h3 style="color:var(--secondary-color);">
+        <span class="material-icons-outlined" style="color:var(--accent-color);">auto_stories</span>
+        کتاب‌های مرتبط
+    </h3>
     <div id="relatedGrid" class="related-grid"></div>
   </div>
 
 </div>
 
 <footer>
+  <div class="container">
   <div class="footer-container">
     <div class="footer-col">
       <h3>درباره سامانه</h3>
-      <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است.</p>
+      <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است. هدف، سهولت دسترسی اعضا به منابع است.</p>
     </div>
 
     <div class="footer-col">
       <h3>پیوندهای مفید</h3>
       <ul>
-        <li><a href="#">کتابخانه</a></li>
+        <li><a href="#">کتابخانه مرکزی</a></li>
         <li><a href="#">سیستم عضویت</a></li>
+        <li><a href="#">نقشه سایت</a></li>
       </ul>
     </div>
 
     <div class="footer-col">
       <h3>ارتباط با ما</h3>
-      <p>📧 info@library.com</p>
-      <p>☎️ ۰۵۶</p>
+      <p>📧 info@ibnhesam.ac.ir</p>
+      <p>☎️ ۰۵۶-۳۲۲۴۰۰۰</p>
       <p>📍 بیرجند، دانشگاه ابن‌حسام</p>
     </div>
   </div>
 
-  <p class="copy">کلیه حقوق این سامانه محفوظ است.</p>
+  <p class="copy">© کلیه حقوق این سامانه محفوظ است.</p>
+  </div>
 </footer>
 
 <script>
@@ -202,17 +509,32 @@ const token = localStorage.getItem("token");
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 const isPending = user.role === "pending";
 const isMember  = user.role === "member";
+const userNameDisplay = document.getElementById("userNameDisplay");
+const openAuth = document.getElementById("openAuth");
+const logoutBtn = document.getElementById("logoutBtn");
+const menuUserName = document.getElementById("menuUserName");
+const menuProfile = document.getElementById("menuProfile");
+const userMenu = document.getElementById("userMenu");
+const pendingBox = document.getElementById("pendingBox");
+const borrowBtn = document.getElementById("borrowBtn");
 
-/* هدر */
+
+/* ------------------- هدر و منوی کاربر ------------------- */
 function initHeader() {
   if (user?.name) {
     userNameDisplay.textContent = user.name;
+    userNameDisplay.style.display = "inline-block";
     openAuth.style.display = "none";
     logoutBtn.style.display = "inline-block";
     menuUserName.textContent = user.name;
-
+    
+    // تنظیم لینک پروفایل بسته به نقش
     menuProfile.onclick = () => {
-      window.location.href = "member-panel.html";
+      if (user.role === "admin") {
+         window.location.href = "admin-panel.html";
+      } else {
+         window.location.href = "member-panel.html";
+      }
     };
 
     logoutBtn.onclick = () => {
@@ -225,6 +547,19 @@ function initHeader() {
       userMenu.style.display =
         userMenu.style.display === "none" ? "block" : "none";
     };
+    
+    // بستن منوی پروفایل با کلیک بیرون
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".header-icons") && userMenu) {
+            userMenu.style.display = "none";
+        }
+    });
+
+  } else {
+      openAuth.onclick = () => {
+          // در صورت عدم ورود، کاربر را به صفحه اصلی هدایت کن تا مودال ورود باز شود
+          window.location.href = "index.html"; 
+      };
   }
 }
 
@@ -232,58 +567,86 @@ if (isPending) {
   pendingBox.style.display = "block";
 }
 
-/* لود اطلاعات کتاب */
+/* ------------------- لود اطلاعات کتاب ------------------- */
 async function loadBook() {
   const res = await fetch(`${API}/api/public/books`);
   const books = await res.json();
 
   const book = books.find((b) => b.id == bookId);
   if (!book) {
-    alert("کتاب یافت نشد");
+    document.getElementById("bookTitle").textContent = "کتاب یافت نشد";
     return;
   }
+  const bookImg = document.getElementById("bookImg");
 
-  bookTitle.textContent = book.title;
-  bookAuthor.textContent = book.author;
-  bookYear.textContent = book.publication_year;
-  bookCategory.textContent = book.category ?? "—";
-  bookCopies.textContent = book.available_copies;
+bookImg.src = book.image
+  ? `${API}${book.image}`
+  : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
 
-  // Borrow واقعی
-  if (isPending) {
+  document.getElementById("bookTitle").textContent = book.title;
+  document.getElementById("bookAuthor").textContent = book.author;
+  document.getElementById("bookYear").textContent = book.publication_year;
+  document.getElementById("bookCategory").textContent = book.category ?? "—";
+  
+  const copiesSpan = document.getElementById("bookCopies");
+  copiesSpan.textContent = book.available_copies;
+  copiesSpan.style.color = book.available_copies > 0 ? 'var(--success)' : 'var(--danger)';
+
+
+  // منطق دکمه امانت
+  if (!token) {
     borrowBtn.classList.add("disabled");
+    borrowBtn.textContent = "برای امانت، وارد شوید";
+    borrowBtn.onclick = () => window.location.href = "index.html";
+  } else if (isPending) {
+    borrowBtn.classList.add("disabled");
+    borrowBtn.textContent = "امانت (در انتظار تایید)";
     borrowBtn.onclick = () =>
       alert("پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.");
+  } else if (book.available_copies < 1) {
+    borrowBtn.classList.add("disabled");
+    borrowBtn.style.background = 'var(--danger)';
+    borrowBtn.textContent = "موجودی به اتمام رسیده است";
+    borrowBtn.onclick = () => {};
   } else {
     borrowBtn.onclick = () => borrowBook(book.id);
   }
 
+
+  // لود کتاب‌های مرتبط
   const related = books.filter(
     (b) => b.category === book.category && b.id != book.id
   );
+  const relatedGrid = document.getElementById("relatedGrid");
 
   relatedGrid.innerHTML = related.length
-    ? related.map(b => `
+  ? related.map(b => {
+      const img = b.image
+        ? `${API}${b.image}`
+        : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
+
+      return `
         <div class="related-item"
              onclick="location.href='book.html?id=${b.id}'">
-          <img src="https://cdn-icons-png.flaticon.com/512/29/29302.png">
+          <img src="${img}" alt="تصویر کتاب">
           <p>${b.title}</p>
         </div>
-      `).join("")
-    : "<p>کتاب مشابهی یافت نشد.</p>";
+      `;
+    }).join("")
+  : "<p style='color:var(--text-light);'>کتاب مشابهی یافت نشد.</p>";
+
 }
 
-/* Borrow */
+/* ------------------- امانت گرفتن ------------------- */
 async function borrowBook(id) {
-  if (!token) {
-    alert("برای امانت گرفتن ابتدا وارد حساب کاربری شوید");
+  if (!token || !isMember) {
+    alert("شما مجوز امانت گرفتن ندارید (وارد حساب شوید و/یا منتظر تایید مدیر بمانید).");
     return;
   }
-
-  if (!isMember) {
-    alert("حساب شما هنوز توسط مدیر تایید نشده است");
-    return;
-  }
+  
+  // دکمه را غیرفعال می‌کنیم تا کاربر دوبار کلیک نکند
+  borrowBtn.classList.add("disabled");
+  borrowBtn.textContent = "در حال ثبت...";
 
   const res = await fetch(`${API}/api/borrow`, {
     method: "POST",
@@ -295,14 +658,16 @@ async function borrowBook(id) {
   });
 
   const data = await res.json();
+  borrowBtn.classList.remove("disabled"); // فعال‌سازی مجدد
 
   if (!res.ok) {
-    alert(data.error || "خطا در امانت گرفتن کتاب");
+    alert(data.error || "خطا در امانت گرفتن کتاب. شاید قبلاً امانت گرفته‌اید یا موجودی کافی نیست.");
+    borrowBtn.textContent = "امانت گرفتن";
     return;
   }
 
-  alert(data.message || "کتاب با موفقیت امانت گرفته شد");
-  loadBook(); // بروزرسانی موجودی
+  alert(data.message || "کتاب با موفقیت امانت گرفته شد. برای مشاهده به داشبورد کاربر مراجعه کنید.");
+  loadBook(); // بروزرسانی موجودی و وضعیت دکمه
 }
 
 initHeader();

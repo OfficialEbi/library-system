@@ -1,466 +1,1076 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎛 پنل مدیریت کتابخانه</title>
-  <link rel="stylesheet" href="style.css">
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
   <style>
-    body {
-      display: flex;
-      background: #f4f7fb;
+    /* ---------------------------------------------------
+       1. تنظیمات کلی و متغیرها
+    --------------------------------------------------- */
+    :root {
+      --primary-color: #2563eb;       /* آبی مدرن (برای دکمه‌ها و فعال بودن) */
+      --secondary-color: #1e293b;     /* سرمه‌ای تیره (برای سایدبار و تیتر جداول) */
+      --accent-color: #f59e0b;        /* نارنجی/طلایی (برای تاکید) */
+      --bg-color: #f3f4f6;            /* خاکستری خیلی روشن پس‌زمینه اصلی */
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --text-light: #64748b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 12px;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* سایه نرم و مدرن */
     }
 
-    /* سایدبار */
+    * {
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+    
+    .dashboard-wrapper {
+      display: flex; 
+      min-height: 100vh;
+      background: var(--bg-color); 
+    }
+
+    /* ---------------------------------------------------
+       2. سایدبار (منوی راست)
+    --------------------------------------------------- */
     .sidebar {
-      width: 240px;
-      height: 100vh;
-      background: #1f3c88;
-      color: white;
-      padding: 25px 20px;
-      position: fixed;
+      width: 260px;
+      background: var(--secondary-color); 
+      box-shadow: 4px 0 15px rgba(0,0,0,0.15); 
+      flex-shrink: 0; 
+      padding: 25px 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
       top: 0;
-      right: 0;
-      box-shadow: -2px 0 6px rgba(0,0,0,0.2);
+      height: 100vh;
+      box-sizing: border-box;
+      z-index: 1000;
     }
 
     .sidebar h2 {
-      font-size: 22px;
-      margin-bottom: 25px;
+      font-size: 1.4rem;
       text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .sidebar ul {
-      list-style: none;
+    
+    .sidebar-nav {
+      flex-grow: 1; 
       padding: 0;
     }
-
-    .sidebar ul li {
-      padding: 12px;
-      background: rgba(255,255,255,0.1);
-      margin-bottom: 10px;
-      border-radius: 6px;
+    
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: #cbd5e1; 
+      padding: 14px 25px;
+      margin-bottom: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
       cursor: pointer;
-      transition: .2s;
     }
 
-    .sidebar ul li:hover,
-    .sidebar ul li.active {
-      background: #f9b234;
-      color: #222;
+    .sidebar-nav a .material-icons-outlined {
+        margin-left: 10px;
+        font-size: 20px;
+    }
+
+    .sidebar-nav a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      transform: translateX(-5px);
+    }
+
+    .sidebar-nav a.active {
+      background: var(--primary-color); 
+      color: white;
       font-weight: bold;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      border-right: 4px solid var(--accent-color); 
+      transform: none;
     }
 
-    /* محتوای اصلی */
+    .logout-link-container {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 20px;
+    }
+    
+    .logout-link-container a {
+        color: var(--danger) !important;
+    }
+    .logout-link-container a:hover {
+        background: transparent;
+        color: #fff !important;
+        transform: translateX(-5px);
+    }
+
+    /* ---------------------------------------------------
+       3. محتوای اصلی (content) و تایتل‌ها
+    --------------------------------------------------- */
     .content {
-      margin-right: 260px;
-      padding: 25px;
-      width: 100%;
+      padding: 40px;
+      width: calc(100% - 260px);
+      transition: all 0.3s ease;
     }
-
+    
+    h2 {
+      color: var(--secondary-color);
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    
     .section {
       display: none;
-      animation: fade .4s ease;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .section.active {
       display: block;
     }
 
-    @keyframes fade {
-      from {opacity: 0;}
-      to {opacity: 1;}
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* کارت‌های داشبورد */
+    /* ---------------------------------------------------
+       4. کارت‌های داشبورد
+    --------------------------------------------------- */
     .dashboard-cards {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
     }
-
     .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 250px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        transition: transform 0.3s;
+        border-right: 6px solid var(--primary-color);
     }
-
     .card h3 {
-      color: #1f3c88;
+        font-size: 1rem;
+        color: var(--text-light);
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    .card p {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--secondary-color);
     }
 
-    /* فرم‌ها */
-    .form-box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      width: 450px;
-    }
-
-    .form-box input,
-    .form-box select {
-      width: 90%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .form-box button {
-      background: #1f3c88;
-      color: white;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    /* جدول‌ها */
+    /* ---------------------------------------------------
+       5. استایل جداول
+    --------------------------------------------------- */
     table {
-      width: 100%;
-      background: white;
-      border-collapse: collapse;
-      margin-top: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 20px;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        background: var(--card-bg);
     }
-
     th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
+        padding: 15px 18px;
+        text-align: right;
+        font-size: 0.9rem;
     }
-
     th {
-      background: #1f3c88;
-      color: white;
+        background: var(--secondary-color);
+        color: white;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    tr:hover {
+        background-color: #f1f5f9;
+    }
+    
+    /* ---------------------------------------------------
+       6. استایل فرم‌ها و دکمه‌های عملیاتی
+    --------------------------------------------------- */
+    .form-box {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+    }
+    .form-box h3 {
+        margin-top: 0;
+    }
+    .form-box input, .form-box select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+    }
+    .form-box input:focus, .form-box select:focus {
+        border-color: var(--primary-color);
     }
 
-    .btn-del {
-      background: red;
-      color: white;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
+    /* دکمه‌های فرم باکس (مثل ثبت کتاب) */
+    .form-box button {
+        background: var(--primary-color);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: inline-flex;
+        align-items: center;
     }
-
+    .form-box button:hover {
+        background: #1d4ed8;
+    }
+    
+    /* دکمه‌های عملیاتی داخل جدول */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        line-height: 1;
+        margin-left: 5px;
+    }
+    
     .btn-edit {
-      background: #f9b234;
-      color: #222;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
+        background: var(--primary-color);
+        color: white;
     }
+    .btn-edit:hover {
+        background: #1d4ed8;
+    }
+    .btn-del {
+        background: var(--danger);
+        color: white;
+    }
+    .btn-del:hover {
+        background: #b91c1c;
+    }
+    
+    .btn-add-member {
+        background: var(--success);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-add-member:hover {
+        background: #059669;
+    }
+    
+    .modal-content {
+        background-color: var(--card-bg);
+        margin: 10% auto;
+        padding: 30px;
+        border-radius: var(--radius);
+        width: 50%;
+        max-width: 650px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        position: relative;
+        animation: fadeIn 0.3s;
+    }
+
+    /* ------------------ طرح‌بندی فرم جدید ------------------ */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* دو ستون مساوی */
+        gap: 20px; /* فاصله بین فیلدها */
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 0; 
+    }
+
+    /* در موبایل، فرم تک ستونه می‌شود */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 90%;
+            margin: 5% auto;
+        }
+        .form-grid {
+            grid-template-columns: 1fr; /* یک ستون */
+            gap: 15px;
+        }
+    }
+    /* ---------------------------------------------------- */
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+    /* ---------------------------------------------------
+       7. ریسپانسیو (برای موبایل)
+    --------------------------------------------------- */
+    @media (max-width: 900px) {
+        .dashboard-wrapper {
+            flex-direction: column; 
+        }
+        .sidebar {
+            width: 100%; 
+            height: auto;
+            position: static;
+            padding: 15px 0;
+            flex-direction: row; 
+            align-items: center;
+        }
+        .sidebar h2 {
+            display: none; 
+        }
+        .sidebar-nav {
+            flex-direction: row; 
+            flex-wrap: wrap; 
+            justify-content: space-around;
+            width: 100%;
+        }
+        .sidebar-nav a {
+            padding: 12px 10px;
+            flex-direction: column; 
+            flex-basis: 30%; 
+            text-align: center;
+            border-right: none !important;
+            transform: none !important;
+            margin-bottom: 0;
+        }
+        .sidebar-nav a .material-icons-outlined {
+            margin: 0 0 5px 0;
+        }
+        .content {
+            padding: 20px;
+            width: 100%;
+        }
+        .dashboard-cards {
+            grid-template-columns: 1fr;
+        }
+        .logout-link-container {
+            display: none; 
+        }
+    }
+
+    /* ================================
+   گرید فرم ویرایش کتاب
+================================ */
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 18px;
+  margin-bottom: 25px;
+}
+
+.edit-form-grid label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #334155;
+}
+
+.edit-form-grid input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-family: 'Vazirmatn', sans-serif;
+  font-size: 0.95rem;
+}
+
+.edit-form-grid input:focus {
+  border-color: var(--primary-color);
+}
+/* ================================
+   لایه مودال (مرکزچین کامل)
+================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;     /* ⬅️ وسط عمودی */
+  justify-content: center; /* ⬅️ وسط افقی */
+  z-index: 9999;
+}
+
+
+/* دکمه‌های پایین مودال */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background: var(--primary-color);
+  color: white;
+}
+
+.modal-actions .cancel {
+  background: #e5e7eb;
+  color: #1f2937;
+}    
+
   </style>
 
 </head>
 <body>
 
-  <!-- سایدبار -->
-  <div class="sidebar">
-    <h2>🎛 پنل ادمین</h2>
-    <ul>
-      <li class="active" onclick="showSection('dashboard')">🏠 داشبورد</li>
-      <li onclick="showSection('books')">📚 مدیریت کتاب‌ها</li>
-      <li onclick="showSection('addBook')">➕ افزودن کتاب</li>
-      <li onclick="showSection('users')">👤 مدیریت کاربران</li>
-<li onclick="showSection('borrows', this)">🔁 مدیریت امانت‌ها</li>
-      <li onclick="showSection('stats')">📊 آمار</li>
-      <li onclick="logout()">🚪 خروج</li>
-    </ul>
-  </div>
-
-  <!-- محتوای اصلی -->
-  <div class="content">
-
-    <!-- بخش داشبورد -->
-    <div id="dashboard" class="section active">
-      <h2>🏠 داشبورد مدیریت</h2>
-      <div class="dashboard-cards">
-        <div class="card">
-          <h3>📚 تعداد کتاب‌ها</h3>
-          <p id="countBooks">...</p>
-        </div>
-        <div class="card">
-          <h3>👤 اعضای تایید شده</h3>
-          <p id="countUsers">...</p>
-        </div>
-        <div class="card">
-          <h3>🔁 امانت‌های فعال</h3>
-          <p id="countBorrows">...</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- مدیریت کتاب‌ها -->
-    <div id="books" class="section">
-      <h2>📚 مدیریت کتاب‌ها</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>عنوان</th>
-            <th>نویسنده</th>
-            <th>سال</th>
-            <th>نسخه موجود</th>
-            <th>ویرایش</th>
-            <th>حذف</th>
-          </tr>
-        </thead>
-        <tbody id="booksTable"></tbody>
-      </table>
-    </div>
-
-    <!-- افزودن کتاب -->
-    <div id="addBook" class="section">
-      <h2>➕ افزودن کتاب جدید</h2>
-      <div class="form-box">
-        <input id="title" placeholder="عنوان کتاب">
-        <input id="author" placeholder="نویسنده">
-        <input id="year" placeholder="سال چاپ">
-        <input id="category" placeholder="دسته‌بندی">
-        <input id="copies" placeholder="تعداد نسخه">
-        <button onclick="saveBook()">ثبت</button>
-      </div>
-    </div>
-
-    <!-- مدیریت کاربران -->
-    <div id="users" class="section">
-      <h2>👤 مدیریت کاربران</h2>
-
-      <!-- دکمه افزودن عضو جدید -->
-      <button onclick="showAddMemberForm()" style="margin-bottom:15px;background:#1f3c88;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;">
-        ➕ افزودن عضو جدید
-      </button>
-
-      <!-- فرم ثبت عضو -->
-      <div id="addMemberBox" class="form-box" style="display:none;margin-top:15px;">
-        <h3>ثبت عضو جدید</h3>
-        <input id="mName" placeholder="نام">
-        <input id="mEmail" placeholder="ایمیل">
-        <input id="mPassword" type="password" placeholder="رمز عبور">
-        <select id="mRole">
-          <option value="member">عضو</option>
-          <option value="admin">مدیر</option>
-        </select>
-        <button onclick="addMember()">ثبت</button>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>نام</th>
-            <th>ایمیل</th>
-            <th>نقش</th>
-            <th>ویرایش</th>
-            <th>تایید</th>
-            <th>حذف</th>
-          </tr>
-        </thead>
-        <tbody id="usersTable"></tbody>
-      </table>
-    </div>
-<!-- مدیریت امانت‌ها -->
-  <div id="borrows" class="section">
+  <div class="dashboard-wrapper">
     
-    <h2>🔁 مدیریت امانت‌ها</h2>
-
-<!-- 👇 دقیقاً اینجا -->
-<div style="margin:15px 0;">
-  <button class="btn-edit" onclick="loadBorrows('active')">
-    امانت‌های فعال
-  </button>
-
-  <button class="btn-edit" onclick="loadBorrows('returned')">
-  سوابق امانت‌های تکمیل‌شده
-</button>
-</div>
-
-
-  <table>
-    <thead>
-      <tr>
-        <th>عضو</th>
-        <th>کتاب</th>
-        <th>تاریخ امانت</th>
-        <th>وضعیت</th>
-        <th>عملیات</th>
-      </tr>
-    </thead>
-    <tbody id="borrowsTable">
-      <tr><td colspan="5">در حال بارگذاری...</td></tr>
-    </tbody>
-  </table>
-</div>
-
-    <!-- آمار -->
-    <div id="stats" class="section">
-      <h2>📊 آمار و گزارش‌ها</h2>
-      <p>در حال توسعه...</p>
+    <div class="sidebar">
+      <h2><span class="material-icons-outlined" style="margin-left: 8px; color: var(--accent-color);">settings_account_box</span> پنل ادمین</h2>
+      
+      <div class="sidebar-nav">
+        <a class="active" onclick="showSection('dashboard', this)">
+            <span class="material-icons-outlined">home</span> داشبورد
+        </a>
+        <a onclick="showSection('books', this)">
+            <span class="material-icons-outlined">auto_stories</span> مدیریت کتاب‌ها
+        </a>
+        <a onclick="showSection('addBook', this)">
+            <span class="material-icons-outlined">add_box</span> افزودن کتاب
+        </a>
+        <a onclick="showSection('users', this)">
+            <span class="material-icons-outlined">group</span> مدیریت کاربران
+        </a>
+        <a onclick="showSection('borrows', this)">
+            <span class="material-icons-outlined">swap_horiz</span> مدیریت امانت‌ها
+        </a>
+        <a onclick="showSection('stats', this)">
+            <span class="material-icons-outlined">bar_chart</span> آمار
+        </a>
+        
+        <div class="logout-link-container">
+            <a onclick="logout()">
+                <span class="material-icons-outlined">logout</span> خروج
+            </a>
+        </div>
+      </div>
     </div>
 
+    <div class="content">
+
+      <div id="dashboard" class="section active">
+        <h2><span class="material-icons-outlined">dashboard</span> داشبورد مدیریت</h2>
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>📚 تعداد کتاب‌ها</h3>
+            <p id="countBooks">...</p>
+          </div>
+          <div class="card">
+            <h3>👤 اعضای تایید شده</h3>
+            <p id="countUsers">...</p>
+          </div>
+          <div class="card">
+            <h3>🔁 امانت‌های فعال</h3>
+            <p id="countBorrows">...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="books" class="section">
+        <h2><span class="material-icons-outlined">auto_stories</span> مدیریت کتاب‌ها</h2>
+        <table class="data-table">
+  <thead>
+    <tr>
+      <th>شناسه</th>
+      <th>عنوان</th>
+      <th>نویسنده</th>
+      <th>دسته‌بندی</th>
+      <th>**ISBN**</th> <th>سال چاپ</th>
+      <th>**قفسه**</th> <th>کل موجودی</th>
+      <th>موجودی در دسترس</th>
+      <th>عملیات</th>
+    </tr>
+  </thead>
+  <tbody id="booksTableBody">
+    </tbody>
+</table>
+      </div>
+
+      <div id="addBook" class="section">
+        <h2><span class="material-icons-outlined">add_box</span> افزودن کتاب جدید</h2>
+        <div class="form-box" style="max-width: 700px; margin: auto;"> 
+          <h3>📚 افزودن کتاب جدید</h3>
+          <form id="addBookForm">
+            
+            <div class="form-grid">
+              
+              <div class="form-group">
+                <label for="newTitle">عنوان کتاب:</label>
+                <input type="text" id="newTitle" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="newAuthor">نویسنده:</label>
+                <input type="text" id="newAuthor" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="newCategory">دسته‌بندی:</label>
+                <input type="text" id="newCategory" required>
+              </div>
+
+              <div class="form-group">
+                <label for="newIsbn">ISBN:</label>
+                <input type="text" id="newIsbn" required>
+              </div>
+
+              <div class="form-group">
+                <label for="newYear">سال چاپ:</label>
+                <input type="number" id="newYear" required min="1300" max="1500">
+              </div>
+              
+              <div class="form-group">
+                <label for="newTotalCopies">تعداد کل موجودی:</label>
+                <input type="number" id="newTotalCopies" required min="1">
+              </div>
+              
+              <div class="form-group">
+                <label for="newShelfNumber">شماره قفسه:</label>
+                <input type="text" id="newShelfNumber" required>
+              </div>
+              <div class="form-group">
+  <label for="newImage">عکس کتاب (اختیاری):</label>
+  <input type="file" id="newImage" accept="image/*">
+</div>
+
+
+              </div>
+            <button type="submit" class="btn-primary" style="margin-top: 20px; width: 100%;">ثبت کتاب</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="users" class="section">
+        <h2><span class="material-icons-outlined">group</span> مدیریت کاربران</h2>
+
+        <button class="btn-add-member" onclick="showAddMemberForm()">
+          <span class="material-icons-outlined">person_add</span> افزودن عضو جدید
+        </button>
+
+        <div id="addMemberBox" class="form-box" style="display:none;margin-top:20px; border-right: 4px solid var(--accent-color);">
+          <h3>ثبت عضو جدید</h3>
+          <input id="mName" placeholder="نام و نام خانوادگی">
+          <input id="mEmail" placeholder="آدرس ایمیل">
+          <input id="mPassword" type="password" placeholder="رمز عبور">
+          <select id="mRole">
+            <option value="member">کاربر عادی</option>
+            <option value="admin">مدیر سیستم</option>
+          </select>
+          <button onclick="addMember()">ثبت کاربر</button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>نام</th>
+              <th>ایمیل</th>
+              <th>نقش</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+
+      <div id="borrows" class="section">
+        <h2><span class="material-icons-outlined">swap_horiz</span> مدیریت امانت‌ها</h2>
+
+        <div style="margin:20px 0; display:flex; gap:10px;">
+          <button class="btn-action btn-edit" onclick="loadBorrows('active')">
+            <span class="material-icons-outlined">check_circle_outline</span> امانت‌های جاری
+          </button>
+          <button class="btn-action" style="background:var(--text-light); color:white;" onclick="loadBorrows('returned')">
+            <span class="material-icons-outlined">history</span> تاریخچه بازگشت
+          </button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>عضو</th>
+              <th>کتاب</th>
+              <th>تاریخ امانت</th>
+              <th>وضعیت</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="borrowsTable">
+            <tr><td colspan="5">در حال بارگذاری...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="stats" class="section">
+        <h2><span class="material-icons-outlined">bar_chart</span> آمار و گزارش‌ها</h2>
+        <div class="dashboard-cards">
+          <div class="card" style="border-right-color: var(--success);">
+            <h3>📚 کل کتاب‌های ثبت شده</h3>
+            <p id="statsTotalBooks">...</p>
+          </div>
+          <div class="card" style="border-right-color: var(--accent-color);">
+            <h3>👤 کل کاربران تایید شده</h3>
+            <p id="statsTotalUsers">...</p>
+          </div>
+          <div class="card" style="border-right-color: var(--danger);">
+            <h3>🔁 کل امانت‌های فعال</h3>
+            <p id="statsTotalBorrows">...</p>
+          </div>
+        </div>
+        
+      </div>
+
+    </div>
   </div>
 
 <script>
-function showSection(id, el) {
-  document.querySelectorAll(".section")
-    .forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+    const API = "http://localhost:3000";
+    const token = localStorage.getItem("token");
+// =========================
+// نگه‌داری لیست کتاب‌ها برای ویرایش
+// =========================
+let booksCache = [];
 
-  document.querySelectorAll(".sidebar ul li")
-    .forEach(li => li.classList.remove("active"));
-  el.classList.add("active");
+    function showSection(id, el) {
+      document.querySelectorAll(".section")
+        .forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
 
-  if (id === "borrows") {
-    loadBorrows("active"); // پیش‌فرض: امانت‌های فعال
-  }
-}
+      if(el) {
+          document.querySelectorAll(".sidebar-nav a") 
+            .forEach(link => link.classList.remove("active"));
+          el.classList.add("active");
+      }
 
+      if (id === "borrows") {
+        loadBorrows("active");
+      }
+      
+      if (id === "books") {
+        loadBooks();
+      }
+      
+      if (id === "users") {
+        loadUsers();
+      }
+    }
 
     function logout() {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "index.html";
     }
+// =========================
+// باز کردن مودال ویرایش کتاب با ID
+// =========================
+function openEditBookById(id) {
+  const book = booksCache.find(b => b.id === id);
 
-    const API = "http://localhost:3000";
-    const token = localStorage.getItem("token");
+  if (!book) {
+    alert("❌ کتاب پیدا نشد");
+    return;
+  }
+
+  document.getElementById("editBookId").value = book.id;
+  document.getElementById("editTitle").value = book.title;
+  document.getElementById("editAuthor").value = book.author;
+  document.getElementById("editCategory").value = book.category || "";
+  document.getElementById("editIsbn").value = book.isbn || "";
+  document.getElementById("editYear").value = book.publication_year;
+  document.getElementById("editTotalCopies").value = book.total_copies;
+  document.getElementById("editShelfNumber").value = book.shelf_number || "";
+
+  document.getElementById("editBookModal").style.display = "flex";
+}
+
+// =========================
+// بستن مودال ویرایش کتاب
+// =========================
+function closeEditModal() {
+  document.getElementById("editBookModal").style.display = "none";
+}
+// =========================
+// ارسال ویرایش کتاب به سرور
+// همراه با عکس اختیاری
+// =========================
+async function submitEditBook() {
+  const id = document.getElementById("editBookId").value;
+  const token = localStorage.getItem("token");
+
+  // استفاده از FormData برای پشتیبانی از عکس
+  const formData = new FormData();
+
+  formData.append("title", document.getElementById("editTitle").value);
+  formData.append("author", document.getElementById("editAuthor").value);
+  formData.append("category", document.getElementById("editCategory").value);
+  formData.append("isbn", document.getElementById("editIsbn").value);
+  formData.append("publication_year", document.getElementById("editYear").value);
+  formData.append("total_copies", document.getElementById("editTotalCopies").value);
+  formData.append("shelf_number", document.getElementById("editShelfNumber").value);
+
+  // اگر عکس جدید انتخاب شده باشد
+  const imageInput = document.getElementById("editImage");
+  if (imageInput.files.length > 0) {
+    formData.append("image", imageInput.files[0]);
+  }
+
+  const res = await fetch(`${API}/api/books/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + token
+      // ❗ Content-Type عمداً تنظیم نشده (multer خودش می‌سازد)
+    },
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("✅ کتاب با موفقیت ویرایش شد");
+    closeEditModal();
+    loadBooks();
+  } else {
+    alert("❌ خطا: " + (data.error || "خطای نامشخص"));
+  }
+}
+
 
     /* -----------------------------
-       لود داشبورد
+       لود داشبورد (اطلاعات این بخش، بخش آمار را نیز پر می‌کند)
     -----------------------------*/
     async function loadDashboard() {
       try {
+        // --- 1. آمار کتاب‌ها (بدون تغییر) ---
         const resBooks = await fetch(`${API}/api/stats/books`, {
           headers: { "Authorization": "Bearer " + token }
         });
         const books = await resBooks.json();
         document.getElementById("countBooks").innerText = books.count;
+        document.getElementById("statsTotalBooks").innerText = books.count;
 
+        // --- 2. آمار کاربران (بدون تغییر) ---
         const resUsers = await fetch(`${API}/api/stats/users`, {
           headers: { "Authorization": "Bearer " + token }
         });
         const users = await resUsers.json();
         document.getElementById("countUsers").innerText = users.count;
+        document.getElementById("statsTotalUsers").innerText = users.count;
 
-        const resBorrows = await fetch(`${API}/api/stats/borrows`, {
+
+        // --- 3. آمار امانت‌ها (اصلاح شد) ---
+        // استفاده از همان آدرس لود لیست امانت‌های فعال و گرفتن طول آرایه
+        const resBorrows = await fetch(`${API}/api/borrows/active`, { 
           headers: { "Authorization": "Bearer " + token }
         });
-        const borrows = await resBorrows.json();
-        document.getElementById("countBorrows").innerText = borrows.count;
+        const borrows = await resBorrows.json(); 
+        
+        const activeBorrowsCount = Array.isArray(borrows) ? borrows.length : 0; // محاسبه تعداد امانت‌های فعال
+
+        // به‌روزرسانی کارت‌ها
+        document.getElementById("countBorrows").innerText = activeBorrowsCount;
+        document.getElementById("statsTotalBorrows").innerText = activeBorrowsCount;
 
       } catch (err) {
         console.log("❌ Error loading dashboard:", err);
+        // در صورت خطا، نمایش 'خطا'
+        document.getElementById("countBooks").innerText = 'خطا';
+        document.getElementById("countUsers").innerText = 'خطا';
+        document.getElementById("countBorrows").innerText = 'خطا';
+        document.getElementById("statsTotalBooks").innerText = 'خطا';
+        document.getElementById("statsTotalUsers").innerText = 'خطا';
+        document.getElementById("statsTotalBorrows").innerText = 'خطا';
       }
     }
 
     /* -----------------------------
        لود کتاب‌ها
     -----------------------------*/
-    async function loadBooks() {
-      const res = await fetch(`${API}/api/books`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const books = await res.json();
+    /* ---------------------------------------------------
+   لود لیست کامل کتاب‌ها (برای ادمین)
+--------------------------------------------------- */
+async function loadBooks() {
+  const booksTableBody = document.getElementById("booksTableBody");
+  booksTableBody.innerHTML = `<tr><td colspan="10" class="loading">در حال بارگذاری کتاب‌ها...</td></tr>`;
 
-      document.getElementById("booksTable").innerHTML = books
-        .map(
-          (b) => `
+  try {
+    // استفاده از API جدید admin/books
+    const res = await fetch(`${API}/api/admin/books`, {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      booksTableBody.innerHTML = `<tr><td colspan="10" class="error">شما مجوز دسترسی ندارید.</td></tr>`;
+      return;
+    }
+
+    const books = await res.json();
+    // ذخیره لیست کتاب‌ها برای استفاده در ویرایش
+booksCache = books;
+
+    if (books.length === 0) {
+      booksTableBody.innerHTML = `<tr><td colspan="10" class="empty-list">کتابی در سیستم ثبت نشده است.</td></tr>`;
+      return;
+    }
+
+    booksTableBody.innerHTML = books.map(b => {
+      const isAvailable = b.available_copies > 0;
+      const availableColor = isAvailable ? 'var(--success)' : 'var(--danger)';
+
+      return `
         <tr>
+          <td>${b.id}</td>
           <td>${b.title}</td>
           <td>${b.author}</td>
-          <td>${b.publication_year}</td>
-          <td>${b.available_copies}</td>
-          <td><button class="btn-edit" onclick='editBook(${JSON.stringify(b)})'>ویرایش</button></td>
-          <td><button class="btn-del" onclick="deleteBook(${b.id})">حذف</button></td>
-        </tr>`
-        )
-        .join("");
+          <td>${b.category}</td>
+          <td>${b.isbn}</td>              <td>${b.publication_year}</td>
+          <td>${b.shelf_number}</td>      <td>${b.total_copies}</td>
+          <td style="font-weight: bold; color: ${availableColor};">${b.available_copies}</td>
+          <td>
+            <button class="btn-action btn-edit" onclick="openEditBookById(${b.id})">
+  <span class="material-icons-outlined" style="font-size:16px;">edit</span>
+  ویرایش
+</button>
+
+            <button class="btn-action btn-delete" onclick="deleteBook(${b.id})">
+              <span class="material-icons-outlined" style="font-size:16px;">delete</span>
+              حذف
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Error loading books:", error);
+    booksTableBody.innerHTML = `<tr><td colspan="10" class="error">خطا در اتصال به سرور برای دریافت لیست کتاب‌ها.</td></tr>`;
+  }
+}
+
+/* -----------------------------
+    تابع ویرایش کتاب (نهایی شده و سازگار با فیلدهای کامل)
+    -----------------------------*/
+function editBook(book) {
+    const token = localStorage.getItem("token"); 
+
+    // ⚠️ چک کردن توکن قبل از ارسال
+    if (!token) {
+        alert("❌ ابتدا باید وارد حساب کاربری خود شوید.");
+        return;
     }
 
-    /* -----------------------------
-       تابع ویرایش کتاب
-    -----------------------------*/
-    function editBook(book) {
-      const newTitle = prompt("عنوان جدید:", book.title);
-      const newAuthor = prompt("نویسنده جدید:", book.author);
-      const newYear = prompt("سال جدید:", book.publication_year);
-      const newCategory = prompt("دسته‌بندی جدید:", book.category);
-      const newCopies = prompt("نسخه جدید:", book.available_copies);
+    // جمع آوری داده ها از طریق prompt
+    const newTitle = prompt("عنوان جدید:", book.title);
+    const newAuthor = prompt("نویسنده جدید:", book.author);
+    const newYear = prompt("سال انتشار جدید:", book.publication_year);
+    const newCategory = prompt("دسته‌بندی جدید:", book.category);
 
-      fetch(`${API}/api/books/${book.id}`, {
+    const newIsbn = prompt("ISBN جدید:", book.isbn || ""); 
+    const newTotalCopies = prompt("تعداد کل نسخه‌های جدید:", book.total_copies || book.available_copies); 
+    const newShelfNumber = prompt("شماره قفسه جدید:", book.shelf_number || "");
+
+    if (!newTitle) return; // اگر کنسل شد
+
+    const payload = {
+        title: newTitle,
+        author: newAuthor,
+        publication_year: newYear,
+        category: newCategory,
+        isbn: newIsbn,
+        total_copies: newTotalCopies, 
+        shelf_number: newShelfNumber,
+    };
+
+    fetch(`${API}/api/books/${book.id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
         },
-        body: JSON.stringify({
-          title: newTitle,
-          author: newAuthor,
-          publication_year: newYear,
-          category: newCategory,
-          available_copies: newCopies
-        })
-      }).then(() => {
-        alert("کتاب ویرایش شد");
-        loadBooks();
-      });
-    }
+        body: JSON.stringify(payload)
+    })
+    .then(async (res) => {
+        const data = await res.json();
+        
+        if (res.ok) {
+            alert("✅ کتاب با موفقیت ویرایش شد");
+            loadBooks();
+        } else {
+            // نمایش خطای دقیق سرور (مانند "نمی‌تواند کمتر از تعداد امانت داده شده باشد")
+            alert(`❌ خطا در ویرایش کتاب (کد خطا: ${res.status}): ${data.error || 'خطای نامشخص'}`);
+        }
+    })
+    .catch(err => {
+        console.error("Fetch Error:", err);
+        alert("❌ خطای ارتباط با سرور یا مشکل شبکه.");
+    });
+}
 
     /* -----------------------------
        ذخیره کتاب جدید
     -----------------------------*/
     const titleInput = document.getElementById("title");
-const authorInput = document.getElementById("author");
-const yearInput = document.getElementById("year");
-const categoryInput = document.getElementById("category");
-const copiesInput = document.getElementById("copies");
+    const authorInput = document.getElementById("author");
+    const yearInput = document.getElementById("year");
+    const categoryInput = document.getElementById("category");
+    const copiesInput = document.getElementById("copies");
 
     async function saveBook() {
-  const title = titleInput.value.trim();
-  const author = authorInput.value.trim();
-  const year = yearInput.value.trim();
-  const category = categoryInput.value.trim();
-  const copies = copiesInput.value.trim();
+      const title = titleInput.value.trim();
+      const author = authorInput.value.trim();
+      const year = yearInput.value.trim();
+      const category = categoryInput.value.trim();
+      const copies = copiesInput.value.trim();
 
-  if (!title || !author || !year || !copies) {
-    alert("تمام فیلدها را وارد کنید");
-    return;
+      if (!title || !author || !year || !copies) {
+        alert("تمام فیلدها را وارد کنید");
+        return;
+      }
+
+      fetch(`${API}/api/books`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          author,
+          category,
+          publication_year: year,
+          available_copies: copies
+        })
+      })
+        .then(res => res.json())
+        .then(() => {
+          alert("کتاب ثبت شد");
+          titleInput.value = '';
+          authorInput.value = '';
+          yearInput.value = '';
+          categoryInput.value = '';
+          copiesInput.value = '';
+        });
+    }
+    /* ---------------------------------------------------
+   افزودن کتاب جدید
+--------------------------------------------------- */
+    document.getElementById("addBookForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("title", document.getElementById("newTitle").value.trim());
+  formData.append("author", document.getElementById("newAuthor").value.trim());
+  formData.append("category", document.getElementById("newCategory").value.trim());
+  formData.append("isbn", document.getElementById("newIsbn").value.trim());
+  formData.append("publication_year", document.getElementById("newYear").value);
+  formData.append("total_copies", document.getElementById("newTotalCopies").value);
+  formData.append("shelf_number", document.getElementById("newShelfNumber").value);
+
+  // 👇 عکس اختیاری
+  const imageInput = document.getElementById("newImage");
+  if (imageInput && imageInput.files.length > 0) {
+    formData.append("image", imageInput.files[0]);
   }
 
-  fetch(`${API}/api/books`, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      title,
-      author,
-      category,
-      publication_year: year,
-      available_copies: copies
-    })
-  })
-    .then(res => res.json())
-    .then(() => {
-      alert("کتاب ثبت شد");
-      loadBooks();
+  try {
+    const res = await fetch(`${API}/api/books`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token
+        // ❌ Content-Type نذار (multer خودش تنظیم می‌کند)
+      },
+      body: formData
     });
-}
 
+    const data = await res.json();
 
+    if (res.ok) {
+      alert("✅ کتاب با موفقیت ثبت شد");
+      document.getElementById("addBookForm").reset();
+      loadBooks();
+    } else {
+      alert(`❌ خطا: ${data.error || "خطای نامشخص"}`);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ خطا در ارتباط با سرور");
+  }
+};
+ 
     /* -----------------------------
        حذف کتاب
     -----------------------------*/
     async function deleteBook(id) {
-      if (!confirm("حذف شود؟")) return;
+      if (!confirm("آیا از حذف کتاب مطمئن هستید؟")) return;
 
       await fetch(`${API}/api/books/${id}`, {
         method: "DELETE",
@@ -476,15 +1086,16 @@ const copiesInput = document.getElementById("copies");
     =============================*/
 
     function showAddMemberForm() {
-      addMemberBox.style.display = "block";
+      document.getElementById("addMemberBox").style.display = 
+         document.getElementById("addMemberBox").style.display === "block" ? "none" : "block";
     }
 
     /* افزودن عضو */
     async function addMember() {
-      const name = mName.value;
-      const email = mEmail.value;
-      const password = mPassword.value;
-      const role = mRole.value;
+      const name = document.getElementById("mName").value;
+      const email = document.getElementById("mEmail").value;
+      const password = document.getElementById("mPassword").value;
+      const role = document.getElementById("mRole").value;
 
       const res = await fetch(`${API}/api/admin/users`, {
         method: "POST",
@@ -505,7 +1116,9 @@ const copiesInput = document.getElementById("copies");
     function editUser(u) {
       const newName = prompt("نام جدید:", u.name);
       const newEmail = prompt("ایمیل جدید:", u.email);
-      const newRole = prompt("نقش جدید (admin/member):", u.role);
+      const newRole = prompt("نقش جدید (admin/member/pending):", u.role);
+      
+      if (!newName) return;
 
       fetch(`${API}/api/admin/users/${u.id}`, {
         method: "PUT",
@@ -561,26 +1174,31 @@ const copiesInput = document.getElementById("copies");
       });
       const users = await res.json();
 
-      usersTable.innerHTML = users
+      document.getElementById("usersTable").innerHTML = users
         .map(
           (u) => `
         <tr>
           <td>${u.name}</td>
           <td>${u.email}</td>
-          <td>${u.role}</td>
-
-          <td><button class="btn-edit" onclick='editUser(${JSON.stringify(u)})'>ویرایش</button></td>
-
           <td>
+             <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; background:${u.role === 'admin' ? '#dbeafe' : (u.role === 'member' ? '#e5e7eb' : '#fff3cd')}; color:${u.role === 'admin' ? '#1e40af' : (u.role === 'member' ? '#374151' : '#856404')}">
+               ${u.role}
+             </span>
+          </td>
+          <td>
+            <button class="btn-action btn-edit" onclick='editUser(${JSON.stringify(u)})'>
+                <span class="material-icons-outlined" style="font-size:16px;">edit</span>
+            </button>
             ${
               u.role === "pending"
-                ? `<button class="btn-edit" onclick="approveUser(${u.id})">تایید</button>`
-                : "✔"
+                ? `<button class="btn-action" style="background:var(--accent-color);color:black" onclick="approveUser(${u.id})">
+                     <span class="material-icons-outlined" style="font-size:16px;">check_circle</span>
+                   </button>`
+                : ``
             }
-          </td>
-
-          <td>
-            <button class="btn-del" onclick="deleteUser(${u.id})">حذف</button>
+             <button class="btn-action btn-del" onclick="deleteUser(${u.id})">
+                <span class="material-icons-outlined" style="font-size:16px;">delete</span>
+            </button>
           </td>
         </tr>`
         )
@@ -589,98 +1207,162 @@ const copiesInput = document.getElementById("copies");
 
 
     /* =============================
-   مدیریت امانت‌ها (جلسه ۸)
-============================= */
+       مدیریت امانت‌ها
+    ============================= */
 
+    async function loadBorrows(type = "active") {
+      const endpoint =
+        type === "returned"
+          ? `${API}/api/borrows/history`
+          : `${API}/api/borrows/active`;
 
-async function loadBorrows(type = "active") {
-  const endpoint =
-    type === "returned"
-      ? `${API}/api/borrows/history`
-      : `${API}/api/borrows/active`;
+      const res = await fetch(endpoint, {
+        headers: { Authorization: "Bearer " + token }
+      });
 
-  const res = await fetch(endpoint, {
-    headers: { Authorization: "Bearer " + token }
-  });
+      const borrows = await res.json();
+      const tbody = document.getElementById("borrowsTable");
 
-  const borrows = await res.json();
-  const tbody = document.getElementById("borrowsTable");
+      if (!borrows || borrows.length === 0) {
+        tbody.innerHTML =
+          `<tr><td colspan="5" style="padding:20px; color:#999; text-align:center;">موردی یافت نشد</td></tr>`;
+        return;
+      }
 
-  if (!borrows || borrows.length === 0) {
-    tbody.innerHTML =
-      `<tr><td colspan="5">موردی یافت نشد</td></tr>`;
-    return;
-  }
+      tbody.innerHTML = borrows.map(b => {
+        const borrowDate = new Date(b.borrow_date);
+        const returnDate = b.return_date ? new Date(b.return_date) : null;
 
-  tbody.innerHTML = borrows.map(b => {
-    const borrowDate = new Date(b.borrow_date);
-    const returnDate = b.return_date ? new Date(b.return_date) : null;
+        const dueDate = new Date(borrowDate);
+        dueDate.setDate(dueDate.getDate() + 14);
 
-    // مهلت امانت: 14 روز
-    const dueDate = new Date(borrowDate);
-    dueDate.setDate(dueDate.getDate() + 14);
+        let statusText = "در مهلت";
+        let statusColor = "var(--success)";
 
-    let statusText = "در مهلت";
-    let statusColor = "green";
+        if (!returnDate && new Date() > dueDate) {
+          const delayDays =
+            Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24));
+          statusText = `تاخیر ${delayDays} روز`;
+          statusColor = "var(--danger)";
+        }
 
-    if (!returnDate && new Date() > dueDate) {
-      const delayDays =
-        Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24));
-      statusText = `تاخیر ${delayDays} روز`;
-      statusColor = "red";
+        if (returnDate) {
+          statusText = "بازگشت شده";
+          statusColor = "#64748b";
+        }
+
+        return `
+          <tr>
+            <td style="font-weight:bold">${b.member}</td>
+            <td>${b.title}</td>
+            <td>${borrowDate.toLocaleDateString("fa-IR")}</td>
+            <td style="color:${statusColor};font-weight:bold;">
+              ${statusText}
+            </td>
+            <td>
+              ${
+                !returnDate
+                  ? `<button class="btn-action btn-edit" onclick="returnBorrow(${b.id})">
+                       <span class="material-icons-outlined" style="font-size:16px;">keyboard_return</span>
+                       ثبت بازگشت
+                     </button>`
+                  : "—"
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
-    if (returnDate) {
-      statusText = "بازگشت شده";
-      statusColor = "#555";
+    async function returnBorrow(borrowId) {
+      if (!confirm("کتاب بازگردانده شود؟")) return;
+
+      const res = await fetch(`${API}/api/return/${borrowId}`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      });
+
+      const data = await res.json();
+      alert(data.message || data.error);
+
+      loadDashboard();
+      if(document.getElementById('borrows').classList.contains('active')){
+         loadBorrows('active');
+      }
     }
-
-    return `
-      <tr>
-        <td>${b.member}</td>
-        <td>${b.title}</td>
-        <td>${borrowDate.toLocaleDateString("fa-IR")}</td>
-        <td style="color:${statusColor};font-weight:bold;">
-          ${statusText}
-        </td>
-        <td>
-          ${
-            !returnDate
-              ? `<button class="btn-edit" onclick="returnBorrow(${b.id})">
-                   بازگشت
-                 </button>`
-              : "—"
-          }
-        </td>
-      </tr>
-    `;
-  }).join("");
-}
-async function returnBorrow(borrowId) {
-  if (!confirm("کتاب بازگردانده شود؟")) return;
-
-  const res = await fetch(`${API}/api/return/${borrowId}`, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token
-    }
-  });
-
-  const data = await res.json();
-  alert(data.message || data.error);
-
-  loadBooks();
-  loadDashboard();
-}
 
 
     /* -----------------------------
        اجرای اولیه
     -----------------------------*/
-    loadBooks();
-loadUsers();
-loadDashboard();
+    loadDashboard();
 </script>
+<!-- ============================= -->
+<!-- مودال ویرایش کتاب (نسخه نهایی) -->
+<!-- ============================= -->
+<div id="editBookModal" class="modal">
+  <div class="modal-content">
+
+    <h3>✏️ ویرایش کتاب</h3>
+
+    <input type="hidden" id="editBookId">
+
+    <!-- گرید فرم -->
+    <div class="edit-form-grid">
+
+      <div>
+        <label>عنوان کتاب</label>
+        <input id="editTitle" type="text">
+      </div>
+
+      <div>
+        <label>نویسنده</label>
+        <input id="editAuthor" type="text">
+      </div>
+
+      <div>
+        <label>دسته‌بندی</label>
+        <input id="editCategory" type="text">
+      </div>
+
+      <div>
+        <label>ISBN</label>
+        <input id="editIsbn" type="text">
+      </div>
+
+      <div>
+        <label>سال چاپ</label>
+        <input id="editYear" type="number">
+      </div>
+
+      <div>
+        <label>تعداد کل</label>
+        <input id="editTotalCopies" type="number">
+      </div>
+
+      <div>
+        <label>شماره قفسه</label>
+        <input id="editShelfNumber" type="text">
+      </div>
+
+      <div>
+        <label>عکس جدید (اختیاری)</label>
+        <input id="editImage" type="file" accept="image/*">
+      </div>
+
+    </div>
+
+    <!-- دکمه‌ها -->
+    <div class="modal-actions">
+      <button onclick="submitEditBook()">ذخیره تغییرات</button>
+      <button class="cancel" onclick="closeEditModal()">انصراف</button>
+    </div>
+
+  </div>
+</div>
+
 
 </body>
 </html>
