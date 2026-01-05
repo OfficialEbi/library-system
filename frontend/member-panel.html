@@ -330,10 +330,15 @@
     </div>
     
     <div class="sidebar-nav">
+
       <a id="nav-dashboard" onclick="switchSection('dashboard', this)" class="active">
         <span class="material-icons-outlined">dashboard</span> داشبورد
       </a>
-      
+      <a id="nav-wallet" onclick="switchSection('wallet', this)">
+      <span class="material-icons-outlined">account_balance_wallet</span>
+       کیف پول
+      </a>
+
       <a id="nav-settings" onclick="switchSection('settings', this)">
         <span class="material-icons-outlined">settings</span> تنظیمات
       </a>
@@ -355,7 +360,7 @@
 
       <div id="dashboard" class="content-section active">
         <h2><span class="material-icons-outlined" style="font-size: 32px; margin-left: 10px;">menu_book</span> امانت‌های شما</h2>
-
+        
         <h3><span class="material-icons-outlined">history</span> تاریخچه امانت‌ها</h3>
 
         <table>
@@ -363,7 +368,7 @@
             <tr>
               <th>کتاب</th>
               <th>تاریخ امانت</th>
-              <th>تاریخ بازگشت</th>
+              <th>موعد بازگشت</th>
               <th>وضعیت</th>
             </tr>
           </thead>
@@ -373,7 +378,52 @@
         </table>
         
       </div>
-      
+      <!-- ================= کیف پول ================= -->
+<div id="wallet" class="content-section">
+
+  <h2>
+    <span class="material-icons-outlined" style="font-size:32px;margin-left:10px;">
+      account_balance_wallet
+    </span>
+    کیف پول
+  </h2>
+
+  <!-- کارت موجودی -->
+  <div style="
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(37,99,235,0.3);
+    margin-bottom: 30px;
+  ">
+    <h3 style="margin:0 0 15px 0; font-size:20px;">
+      موجودی فعلی
+    </h3>
+
+    <div id="walletAmount" style="font-size:36px;font-weight:700;">
+      0 تومان
+    </div>
+
+    <p id="walletStatus" style="margin-top:10px;opacity:0.9;">
+      وضعیت کیف پول
+    </p>
+  </div>
+
+  <!-- توضیح -->
+  <div class="profile-box">
+    <h3>
+      <span class="material-icons-outlined">info</span>
+      توضیحات
+    </h3>
+    <p style="line-height:1.9;">
+      در صورت دیرکرد در بازگرداندن کتاب‌ها، مبلغ جریمه به صورت خودکار
+      از کیف پول شما کسر می‌شود. موجودی کیف پول می‌تواند منفی شود.
+    </p>
+  </div>
+
+</div>
+
       <div id="settings" class="content-section">
         <h2><span class="material-icons-outlined" style="font-size: 32px; margin-left: 10px;">settings</span> تنظیمات پروفایل</h2>
         
@@ -429,58 +479,153 @@ emailField.value = user.email;
 
 /* --- منطق تغییر بخش‌های محتوا --- */
 function switchSection(sectionId, element) {
-    // حذف کلاس active از همه لینک‌های ناوبری
+    // حذف کلاس active از منوها
     document.querySelectorAll('.sidebar-nav a').forEach(link => {
         link.classList.remove('active');
     });
-    // افزودن کلاس active به لینک کلیک شده
+
+    // فعال کردن منوی انتخاب شده
     element.classList.add('active');
 
     // مخفی کردن همه سکشن‌ها
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
-    // نمایش سکشن مورد نظر
+
+    // نمایش سکشن انتخاب شده
     document.getElementById(sectionId).classList.add('active');
+
+    // ✅ اگر کیف پول انتخاب شد، موجودی را تازه بگیر
+    if (sectionId === "wallet") {
+        loadWallet();
+    }
+}
+
+// ==============================
+// 🧠 نرمال‌سازی تاریخ (بدون ساعت)
+// ==============================
+function normalizeDate(dateStr) {
+  const [y, m, d] = dateStr.split("T")[0].split("-");
+  return new Date(Number(y), Number(m) - 1, Number(d));
 }
 
 
-/* 🔁 امانت‌های کاربر */
+
+/* 🔁 امانت‌های کاربر + محاسبه دیرکرد */
 async function loadMyBorrows() {
   const tbody = document.getElementById("borrowTable");
 
   try {
+    // درخواست دریافت لیست امانت‌ها از سرور
     const res = await fetch(`${API}/api/my-borrows`, {
       headers: { Authorization: "Bearer " + token }
     });
 
     const data = await res.json();
 
+    // اگر کاربر هیچ امانتی نداشته باشد
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #777;">شما تاکنون امانتی ثبت نکرده‌اید.</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center; color:#777;">
+            شما تاکنون امانتی ثبت نکرده‌اید.
+          </td>
+        </tr>`;
       return;
     }
 
+    // تاریخ امروز (بدون ساعت برای محاسبه دقیق روز)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     tbody.innerHTML = data.map(b => {
-      const isReturned = !!b.return_date;
-      const statusClass = isReturned ? "borrow-returned" : "borrow-pending";
-      const statusText = isReturned ? "بازگشت داده شده" : "در انتظار بازگشت";
-      const returnDateDisplay = b.return_date ? new Date(b.return_date).toLocaleDateString("fa-IR") : "—";
+
+      const borrowDate = normalizeDate(b.borrow_date);
+const dueDate    = b.due_date ? normalizeDate(b.due_date) : null;
+
+
+      // آیا کتاب بازگردانده شده؟
+      const isReturned = b.status === "returned";
+
+      let statusText  = "";
+      let statusClass = "";
+
+      // ======================================
+      // 🧠 منطق وضعیت امانت
+      // ======================================
+      if (isReturned) {
+        // اگر کتاب برگشت داده شده
+        statusText  = "بازگشت داده شده";
+        statusClass = "borrow-returned";
+
+      } else if (dueDate && today > dueDate) {
+        // ⛔ دیرکرد: اختلاف روز امروز با موعد بازگشت
+        const diffTime = today.getTime() - dueDate.getTime();
+const lateDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        statusText  = `⛔ ${lateDays} روز دیرکرد`;
+        statusClass = "borrow-pending";
+
+      } else {
+        // هنوز در مهلت مجاز
+        statusText  = "در انتظار بازگشت";
+        statusClass = "borrow-pending";
+      }
 
       return `
         <tr>
           <td>${b.title}</td>
-          <td>${new Date(b.borrow_date).toLocaleDateString("fa-IR")}</td>
-          <td>${returnDateDisplay}</td>
+          <td>${borrowDate.toLocaleDateString("fa-IR")}</td>
+          <td>${dueDate ? dueDate.toLocaleDateString("fa-IR") : "—"}</td>
           <td class="${statusClass}">${statusText}</td>
         </tr>
       `;
     }).join("");
 
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger-color);">خطا در دریافت اطلاعات امانت‌ها</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; color: var(--danger-color);">
+          خطا در دریافت اطلاعات امانت‌ها
+        </td>
+      </tr>`;
   }
 }
+
+/* =========================
+   💰 دریافت و نمایش کیف پول
+   ========================= */
+async function loadWallet() {
+  try {
+    const res = await fetch(`${API}/api/wallet`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+
+    const data = await res.json();
+
+    const walletEl = document.getElementById("walletAmount");
+    const statusEl = document.getElementById("walletStatus");
+
+    // نمایش مبلغ کیف پول
+    walletEl.innerText =
+      data.wallet.toLocaleString("fa-IR") + " تومان";
+
+    // تعیین وضعیت کیف پول
+    const walletValue = Number(data.wallet);
+
+    if (data.wallet < 0) {
+      statusEl.innerText = "⛔ بدهکار (به دلیل دیرکرد)";
+      statusEl.style.color = "#ffdddd";
+    } else {
+      statusEl.innerText = "✔ بدون بدهی";
+      statusEl.style.color = "#dcfce7";
+    }
+
+  } catch (e) {
+    console.error("Wallet error:", e);
+  }
+}
+
 
 async function updateProfile() {
   const newName = nameField.value.trim();
@@ -514,7 +659,7 @@ function logout() {
   localStorage.clear();
   location.href = "index.html";
 }
-
+loadWallet();
 loadMyBorrows();
 </script>
 

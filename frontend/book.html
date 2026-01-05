@@ -1,35 +1,30 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📘 اطلاعات کتاب</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📘 جزئیات کتاب | سامانه مدیریت کتابخانه</title>
+
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-  
+
   <style>
-    /* ---------------------------------------------------
-       1. تنظیمات کلی و متغیرها (همانند Admin/Index Panel)
-    --------------------------------------------------- */
     :root {
-      --primary-color: #2563eb;       /* آبی مدرن */
-      --secondary-color: #1e293b;     /* سرمه‌ای تیره */
-      --accent-color: #f59e0b;        /* نارنجی/طلایی */
-      --bg-color: #f3f4f6;            /* خاکستری خیلی روشن پس‌زمینه اصلی */
+      --primary-color: #2563eb;
+      --secondary-color: #1e293b;
+      --accent-color: #f59e0b;
+      --bg-color: #f3f4f6;
       --card-bg: #ffffff;
       --text-main: #334155;
       --text-light: #64748b;
       --danger: #ef4444;
       --success: #10b981;
-      --radius: 12px;
-      --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* سایه نرم و مدرن */
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+      --shadow-soft: 0 6px 22px rgba(0, 0, 0, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-      outline: none;
-    }
+    * { box-sizing: border-box; outline: none; }
 
     body {
       margin: 0;
@@ -38,31 +33,22 @@
       background: var(--bg-color);
       color: var(--text-main);
       direction: rtl;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+    .wrapper { max-width: 1400px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    h2, h3 {
-      color: var(--secondary-color);
-      font-weight: 700;
-    }
-
-    /* ---------------------------------------------------
-       2. Header و Navigation (یکسان با index.html)
-    --------------------------------------------------- */
+    /* ---------------- Header (same as your new index) ---------------- */
     header {
-      background: var(--secondary-color);
-      color: white;
-      padding: 15px 0;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.85);
+      color: var(--secondary-color);
+      padding: 14px 0;
       position: sticky;
       top: 0;
       z-index: 999;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      backdrop-filter: blur(12px);
     }
 
     header .container {
@@ -73,11 +59,26 @@
     }
 
     header h1 {
-      font-size: 1.4rem;
+      font-size: 1.15rem;
       margin: 0;
-      font-weight: 700;
+      font-weight: 900;
       display: flex;
       align-items: center;
+      gap: 10px;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    header h1 .logo-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary-color);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
     }
 
     header nav ul {
@@ -85,247 +86,501 @@
       padding: 0;
       margin: 0;
       display: flex;
+      gap: 12px;
+      align-items: center;
     }
 
     header nav a {
-      color: #cbd5e1;
+      color: #334155;
       text-decoration: none;
-      padding: 10px 15px;
+      padding: 10px 12px;
       display: block;
-      transition: color 0.3s;
-      border-bottom: 2px solid transparent;
-      font-weight: 500;
+      transition: all 0.2s;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
     }
 
-    header nav a:hover {
-      color: white;
-      border-bottom: 2px solid var(--primary-color);
+    header nav a:hover,
+    header nav a.active {
+      color: var(--primary-color);
+      background: rgba(37, 99, 235, 0.08);
     }
-    
+
     .header-icons {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
     }
 
     .header-icons .user-name {
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 5px 10px;
-        border-radius: 6px;
-        background: var(--primary-color);
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(37, 99, 235, 0.10);
+      border: 1px solid rgba(37, 99, 235, 0.18);
+      display: none;
+    }
+
+    .header-icons button {
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 800;
+      transition: all 0.2s;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Vazirmatn', sans-serif;
     }
 
     #openAuth {
-      background: var(--accent-color);
-      color: var(--secondary-color);
-      border: none;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--primary-color);
+      border: 1px solid rgba(37, 99, 235, 0.18);
     }
-    #openAuth:hover {
-      background: #e6910b;
-    }
+    #openAuth:hover { background: rgba(37, 99, 235, 0.14); }
+
     #logoutBtn {
-        background: var(--danger);
-        color: white;
-        padding: 8px 12px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
+      background: var(--danger);
+      color: white;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      display: none;
     }
+    #logoutBtn:hover { filter: brightness(0.95); }
+
     .user-menu {
-        position: absolute;
-        top: 45px;
-        left: 0; 
-        right: auto;
-        background: white;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 15px;
-        min-width: 150px;
-        z-index: 1001;
-        text-align: right;
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+      min-width: 190px;
+      z-index: 1001;
+      text-align: right;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      display: none;
     }
     .user-menu p {
-        margin: 0 0 10px 0;
-        font-weight: bold;
-        color: var(--primary-color);
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+      color: var(--primary-color);
+      border-bottom: 1px solid #eef2f7;
+      padding-bottom: 10px;
     }
     .user-menu button {
-        background: var(--primary-color);
-        color: white;
-        width: 100%;
-        margin-top: 10px;
-        padding: 8px 15px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 600;
+      background: var(--primary-color);
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+      justify-content: center;
     }
-    /* دکمه تنظیمات را مخفی می‌کنیم */
-    .header-icons button[title="تنظیمات"] { display: none; }
+    .user-menu button:hover { background: #1d4ed8; }
 
-
-    /* ---------------------------------------------------
-       3. استایل بخش اطلاعات کتاب
-    --------------------------------------------------- */
+    /* Pending */
     #pendingBox {
       background: #fff3cd;
       color: #7f6500;
       border: 1px solid #ffeeba;
       padding: 15px;
-      margin: 25px auto;
-      max-width: 900px;
-      border-radius: var(--radius);
+      margin: 18px auto 0 auto;
+      max-width: 1200px;
+      border-radius: 14px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 900;
       font-size: 15px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      display: none;
     }
 
-    .book-container {
-      max-width: 900px;
-      width: 92%;
-      margin: 40px auto 60px auto;
-      background: var(--card-bg);
-      padding: 35px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border-right: 6px solid var(--primary-color); /* تاکید مدرن */
-    }
-    
-    .book-title-header {
-        font-size: 1.8rem;
-        margin-top: 0;
-        margin-bottom: 15px;
-        color: var(--secondary-color);
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+    /* ---------------- Page ---------------- */
+    main { padding: 26px 0 0; }
 
-    .book-box {
+    .breadcrumb {
       display: flex;
-      gap: 35px;
-      padding: 20px 0;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #eee;
-      margin-bottom: 25px;
-    }
-
-    .book-img {
-      width: 200px; 
-      height: 250px;
-      min-width: 200px;
-      border-radius: var(--radius);
-      background: #eee;
-      object-fit: cover;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .book-info {
-        flex-grow: 1;
-    }
-
-    .book-info p {
-      margin: 12px 0;
-      font-size: 1rem;
-      line-height: 1.8;
-      color: var(--text-main);
-    }
-    .book-info p strong {
-        color: var(--secondary-color);
-        margin-left: 5px;
-    }
-
-    .btn-primary {
-      background: var(--primary-color);
-      color: white;
-      padding: 12px 25px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      margin-top: 20px;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: background-color 0.3s;
-      display: inline-flex;
       align-items: center;
+      gap: 10px;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.92rem;
+      margin: 10px 0 18px;
+      flex-wrap: wrap;
+    }
+    .breadcrumb a {
+      color: #64748b;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    .breadcrumb a:hover { background: rgba(37, 99, 235, 0.08); color: var(--primary-color); }
+    .breadcrumb .sep { opacity: 0.6; }
+
+    .details-card {
+      background: #fff;
+      border: 1px solid rgba(15,23,42,0.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      max-width: 1200px;
+  margin: 0 auto;
+    }
+
+    .details-inner {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+}
+
+    .details-right {
+  background: #f8fafc;
+  border-left: 1px solid #eef2f7; /* به‌جای border-right */
+  border-right: none;
+  padding: 26px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+    align-items: flex-start;
+  position: relative;
+
+}
+
+
+    .badge-status {
+
+      position: absolute;
+      top: 14px;
+  right: 14px; /* چون RTL هست */
+  left: auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #0f172a;
+      border: 1px solid rgba(15,23,42,0.10);
+      background: rgb(16, 185, 129);
+      color: #065f46;
+    }
+    .badge-status.borrowed {
+      background: rgba(239,68,68,0.12);
+      color: #7f1d1d;
+    }
+
+    .cover {
+      width: 240px;
+      max-width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+      aspect-ratio: 2/3;
+      object-fit: cover;
+        align-self: flex-start;
+
+      background: #e5e7eb;
+    }
+
+    .details-left {
+      padding: 26px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .book-title {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 1000;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .book-author {
+      margin: 8px 0 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #475569;
+    }
+
+    .book-author span {
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    .icon-actions {
+      display: inline-flex;
       gap: 8px;
     }
-    .btn-primary:hover:not(.disabled) {
-        background: #1d4ed8;
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.10);
+      background: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      transition: 0.15s;
+    }
+    .icon-btn:hover { background: #f1f5f9; color: var(--primary-color); }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0 16px;
     }
 
-    .btn-primary.disabled {
-      background: var(--text-light);
-      cursor: not-allowed;
-      color: #f3f4f6;
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.92rem;
     }
-    
-    /* کتاب‌های مرتبط */
-    .related-books h3 {
-        color: var(--secondary-color);
-        font-size: 1.4rem;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    .meta-box .lbl { color: #64748b; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .meta-box .val { margin-top: 6px; font-weight: 1000; color: #0f172a; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0 10px;
+      font-weight: 1000;
+      color: #0f172a;
+      font-size: 1.1rem;
     }
+    .section-title .material-icons-outlined { color: var(--primary-color); }
+
+    .desc {
+      margin: 0;
+      color: #334155;
+      text-align: justify;
+      line-height: 1.95;
+    }
+
+    .bottom-row {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid #eef2f7;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stocks {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .stock-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      min-width: 170px;
+    }
+    .stock-box .s-lbl { font-size: 0.88rem; color: #64748b; font-weight: 800; }
+    .stock-box .s-val { font-size: 1.25rem; font-weight: 1000; color: #0f172a; }
+    .stock-box .s-val.green { color: #15803d; }
+
+    .cta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 1000;
+      font-family: 'Vazirmatn', sans-serif;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.15s;
+      min-width: 160px;
+    }
+    .btn.primary { background: var(--primary-color); color: #fff; box-shadow: 0 16px 30px rgba(37,99,235,0.25); }
+    .btn.primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn.outline { background: #fff; color: var(--primary-color); border: 1px solid rgba(37,99,235,0.35); }
+    .btn.outline:hover { background: rgba(37,99,235,0.08); }
+    .btn.disabled { background: #9ca3af !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* ---------------- Similar books ---------------- */
+    .block {
+      margin-top: 34px;
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .block-head h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 1000;
+      color: #0f172a;
+    }
+
+    .block-head a {
+      text-decoration: none;
+      color: var(--primary-color);
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .block-head a:hover { text-decoration: underline; }
 
     .related-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 16px;
     }
 
     .related-item {
-      background: #f8fafc; 
-      padding: 15px 10px;
-      border-radius: var(--radius);
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      background: #fff;
+      border: 1px solid rgba(15,23,42,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       cursor: pointer;
-      transition: 0.3s;
-      border: 1px solid #e2e8f0;
-      font-size: 0.9rem;
+      transition: transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
     }
-
     .related-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-      border-color: var(--primary-color);
+      transform: translateY(-4px);
+      box-shadow: 0 18px 35px rgba(0,0,0,0.10);
     }
 
     .related-item img {
-      width: 100px;
-      height: 120px;
+      width: 100%;
+      aspect-ratio: 2/3;
       object-fit: cover;
-  border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .related-item p {
-        font-weight: 600;
-        margin: 0;
-        color: var(--text-main);
+      background: #e5e7eb;
     }
 
-    /* ---------------------------------------------------
-       4. Footer (یکسان با index.html)
-    --------------------------------------------------- */
+    .related-item .r-body {
+      padding: 10px 10px 12px;
+    }
+    .related-item .r-title {
+      margin: 0;
+      font-weight: 1000;
+      color: #0f172a;
+      font-size: 0.92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .related-item .r-author {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-weight: 800;
+      font-size: 0.78rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---------------- Comments (UI) ---------------- */
+    .comments-card {
+      background: #fff;
+      border: 1px solid rgba(15,23,42,0.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      padding: 18px;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      flex: 0 0 auto;
+    }
+    .comment-form textarea {
+      width: 100%;
+      min-height: 74px;
+      resize: none;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 12px 12px;
+      font-family: 'Vazirmatn', sans-serif;
+      font-weight: 700;
+    }
+    .comment-form textarea:focus { border-color: rgba(37,99,235,0.6); background: #fff; }
+
+    .comment-form .submit-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+    .btn.small { min-width: 120px; padding: 10px 14px; border-radius: 12px; font-size: 0.92rem; }
+
+    .comment-item {
+      padding: 14px 0;
+      border-top: 1px solid #eef2f7;
+    }
+    .comment-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .comment-head .name { font-weight: 1000; color: #0f172a; font-size: 0.95rem; }
+    .comment-head .time { color: #64748b; font-weight: 800; font-size: 0.78rem; margin-right: 4px; }
+    .stars { margin-right: auto; display: inline-flex; gap: 2px; color: #fbbf24; }
+    .comment-text {
+      margin: 8px 52px 0 0;
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.92rem;
+      line-height: 1.9;
+    }
+
+    /* ---------------- Footer (same as index) ---------------- */
     footer {
       background: #1e293b;
       color: #cbd5e1;
@@ -337,8 +592,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
       padding-bottom: 30px;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -350,11 +603,7 @@
       margin-bottom: 15px;
     }
 
-    .footer-col ul {
-      list-style: none;
-      padding: 0;
-    }
-
+    .footer-col ul { list-style: none; padding: 0; }
     .footer-col ul a {
       color: #cbd5e1;
       text-decoration: none;
@@ -362,317 +611,625 @@
       padding: 5px 0;
       transition: color 0.3s;
     }
+    .footer-col ul a:hover { color: #93c5fd; }
 
-    .footer-col ul a:hover {
-      color: var(--primary-color);
+    .copy { text-align: center; margin-top: 20px; font-size: 0.85rem; }
+
+    /* ---------------- Modal (same as index) ---------------- */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      backdrop-filter: blur(4px);
     }
 
-    .copy {
+    .modal-content {
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: zoomIn 0.3s;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .close-btn {
+      color: var(--text-light);
+      float: left;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      transition: color 0.3s;
+    }
+    .close-btn:hover { color: var(--danger); }
+
+    .modal-content h2 {
       text-align: center;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      max-width: 1200px;
-      margin: 20px auto 0;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      color: #0f172a;
+      font-weight: 1000;
     }
 
-    /* ---------------------------------------------------
-       5. Responsive Design
-    --------------------------------------------------- */
-    @media (max-width: 768px) {
-        .book-box {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 20px;
-        }
-        .book-img {
-            width: 150px;
-            height: 200px;
-            min-width: 150px;
-        }
-        .book-container {
-            padding: 20px;
-            width: 100%;
-            margin-top: 20px;
-            border-right: none;
-            border-top: 6px solid var(--primary-color);
-        }
+    .modal-content input {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-sizing: border-box;
+      font-family: 'Vazirmatn', sans-serif;
+      transition: border-color 0.3s;
+    }
+    .modal-content input:focus { border-color: var(--primary-color); }
+
+    .modal-content button {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 900;
+      font-family: 'Vazirmatn', sans-serif;
+      transition: background-color 0.3s;
+    }
+    .modal-content button:hover { background-color: #1d4ed8; }
+
+    .switch-form {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    .switch-form a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 900;
+    }
+    #loginMsg, #signupMsg { text-align: center; margin-top: 10px; font-weight: 900; }
+
+    @media (max-width: 1100px) {
+      .details-inner { grid-template-columns: 1fr; }
+      .details-right { border-right: 0; border-bottom: 1px solid #eef2f7; }
+      .related-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 680px) {
+      header .container { flex-direction: column; gap: 12px; }
+      header nav ul { justify-content: center; flex-wrap: wrap; }
+      .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .book-title { font-size: 1.6rem; }
+      .btn { width: 100%; }
+      .stock-box { width: 100%; min-width: 0; }
     }
   </style>
 </head>
 
 <body>
+  <div class="wrapper">
 
-<header>
-  <div class="container">
-    <h1><span class="material-icons-outlined" style="vertical-align: middle; margin-left: 8px; color: var(--accent-color);">auto_stories</span> کتابخانه دانشگاه ابن‌حسام</h1>
+    <header>
+      <div class="container">
+        <h1 onclick="location.href='index.html'">
+          <span class="logo-box">
+            <span class="material-icons-outlined">local_library</span>
+          </span>
+          کتابخانه دانشگاه ابن‌حسام
+        </h1>
 
-    <nav>
-      <ul>
-        <li><a href="index.html">خانه</a></li>
-        <li><a href="#" class="active">کتاب‌ها</a></li>
-        <li><a href="#">درباره ما</a></li>
-        <li><a href="#">تماس</a></li>
-      </ul>
-    </nav>
+        <nav>
+          <ul>
+            <li><a href="index.html">خانه</a></li>
+            <li><a href="index.html#bookGrid">کتاب‌ها</a></li>
+            <li><a href="#" onclick="return false;">درباره ما</a></li>
+            <li><a href="#" onclick="return false;">تماس</a></li>
+          </ul>
+        </nav>
 
-    <div class="header-icons">
-      <span id="userNameDisplay" class="user-name" style="display:none;"></span>
+        <div class="header-icons">
+          <span id="userNameDisplay" class="user-name"></span>
 
-      <button id="openAuth" title="ورود">🔑 ورود</button>
-      <button id="logoutBtn" style="display:none;" title="خروج">🚪 خروج</button>
+          <button id="openAuth" title="ورود">
+            <span class="material-icons-outlined" style="font-size:20px;">login</span>
+            ورود
+          </button>
 
-      <div id="userMenu" class="user-menu" style="display:none;">
-        <p id="menuUserName"></p>
-        <button id="menuProfile">پروفایل</button>
+          <button id="logoutBtn" title="خروج">
+            <span class="material-icons-outlined" style="font-size:20px;">logout</span>
+            خروج
+          </button>
+
+          <div id="userMenu" class="user-menu">
+            <p id="menuUserName">نام کاربر</p>
+            <button id="menuProfile">پروفایل</button>
+          </div>
+        </div>
       </div>
+    </header>
+
+    <div id="pendingBox" class="container">
+      حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.
+    </div>
+
+    <main class="container">
+
+      <div class="breadcrumb">
+        <a href="index.html"><span class="material-icons-outlined" style="font-size:18px;">home</span> خانه</a>
+        <span class="sep">‹</span>
+        <a href="index.html#bookGrid">کتاب‌ها</a>
+        <span class="sep">‹</span>
+        <a href="#" id="crumbCategory" onclick="return false;">—</a>
+        <span class="sep">‹</span>
+        <span id="crumbTitle" style="color:#94a3b8;font-weight:900;">—</span>
       </div>
-  </div>
-</header>
 
-<div id="pendingBox" style="display:none;">
-  حساب شما هنوز توسط مدیر تایید نشده است. لطفاً منتظر تایید بمانید.
-</div>
+      <section class="details-card">
+        <div class="details-inner">
 
-<div class="book-container">
+          <aside class="details-right">
+            <span id="statusBadge" class="badge-status">موجود</span>
+            <img id="bookImg" class="cover" src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="جلد کتاب" />
+          </aside>
 
-  <h2 id="bookTitle" class="book-title-header">
-      <span class="material-icons-outlined" style="color:var(--primary-color); font-size: 2rem;">menu_book</span>
-      در حال بارگذاری...
-  </h2>
+          <div class="details-left">
+            <div class="title-row">
+              <div>
+                <h1 id="bookTitle" class="book-title">در حال بارگذاری…</h1>
+                <div class="book-author">نویسنده: <span id="bookAuthor">—</span></div>
+              </div>
 
-  <div class="book-box">
-    <img id="bookImg" class="book-img"
-         src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="تصویر کتاب">
+              <div class="icon-actions">
+                <button class="icon-btn" title="علاقه‌مندی‌ها" type="button" onclick="alert('فعلاً نمایشی است 🙂')">
+                  <span class="material-icons-outlined">favorite_border</span>
+                </button>
+                <button class="icon-btn" title="اشتراک‌گذاری" type="button" onclick="copyShareLink()">
+                  <span class="material-icons-outlined">share</span>
+                </button>
+              </div>
+            </div>
 
-    <div class="book-info">
-      <p><strong>نویسنده:</strong> <span id="bookAuthor"></span></p>
-      <p><strong>سال چاپ:</strong> <span id="bookYear"></span></p>
-      <p><strong>دسته‌بندی:</strong> <span id="bookCategory"></span></p>
-      <p style="font-size: 1.1rem;">
-          <strong>نسخه موجود:</strong> 
-          <span id="bookCopies" style="font-weight: bold; color:var(--success);"></span>
-      </p>
+            <div class="meta-grid">
+              <div class="meta-box">
+                <div class="lbl"><span class="material-icons-outlined" style="font-size:18px;">category</span>دسته‌بندی</div>
+                <div class="val" id="bookCategory">—</div>
+              </div>
+              <div class="meta-box">
+                <div class="lbl"><span class="material-icons-outlined" style="font-size:18px;">calendar_today</span>سال چاپ</div>
+                <div class="val" id="bookYear">—</div>
+              </div>
+              <div class="meta-box">
+                <div class="lbl"><span class="material-icons-outlined" style="font-size:18px;">qr_code</span>شابک (ISBN)</div>
+                <div class="val" id="bookISBN">—</div>
+              </div>
+              <div class="meta-box">
+                <div class="lbl"><span class="material-icons-outlined" style="font-size:18px;">inventory_2</span>شماره قفسه</div>
+                <div class="val" id="bookShelf">—</div>
+              </div>
+            </div>
 
-      <button id="borrowBtn" class="btn-primary">
-          <span class="material-icons-outlined">shopping_cart_checkout</span>
-          امانت گرفتن
-      </button>
+            <div class="section-title">
+              <span class="material-icons-outlined">description</span>
+            </div>
+            <p id="bookDesc" class="desc"></p>
+
+            <div class="bottom-row">
+              <div class="stocks">
+                <div class="stock-box">
+                  <div class="s-lbl">موجودی در کتابخانه:</div>
+                  <div class="s-val"><span id="copiesTotal">—</span> جلد</div>
+                </div>
+                <div class="stock-box">
+                  <div class="s-lbl">موجودی در دسترس:</div>
+                  <div class="s-val green"><span id="copiesAvailable">—</span> جلد</div>
+                </div>
+              </div>
+
+              <div class="cta">
+                <button id="reserveBtn" class="btn outline" type="button" onclick="alert('رزرو فعلاً نمایشی است')">
+                  <span class="material-icons-outlined">bookmark_border</span>
+                  رزرو کتاب
+                </button>
+
+                <button id="borrowBtn" class="btn primary" type="button">
+                  <span class="material-icons-outlined">library_add</span>
+                  امانت گرفتن
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <h3>کتاب‌های مشابه</h3>
+          <a href="index.html#bookGrid">مشاهده همه <span class="material-icons-outlined" style="font-size:18px;">arrow_back</span></a>
+        </div>
+
+        <div id="relatedGrid" class="related-grid"></div>
+      </section>
+
+      
+
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-container">
+          <div class="footer-col">
+            <h3>درباره سامانه</h3>
+            <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است. هدف، سهولت دسترسی اعضا به منابع است.</p>
+          </div>
+
+          <div class="footer-col">
+            <h3>پیوندهای مفید</h3>
+            <ul>
+              <li><a href="index.html#bookGrid">کتاب‌ها</a></li>
+              <li><a href="#" onclick="return false;">سیستم عضویت</a></li>
+              <li><a href="#" onclick="return false;">نقشه سایت</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3>ارتباط با ما</h3>
+            <p>📧 info@ibnhesam.ac.ir</p>
+            <p>☎️ ۰۵۶-۳۲۲۴۰۰۰</p>
+            <p>📍 بیرجند، دانشگاه ابن‌حسام</p>
+          </div>
+        </div>
+
+        <p class="copy">© کلیه حقوق این سامانه محفوظ است.</p>
+      </div>
+    </footer>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">✖</span>
+
+        <div id="loginFormBox">
+          <h2>🔑 ورود به حساب</h2>
+          <input type="email" id="loginEmail" placeholder="ایمیل" required>
+          <input type="password" id="loginPassword" placeholder="رمز عبور" required>
+          <button onclick="login()">ورود</button>
+          <p class="switch-form">ثبت‌نام نکردی؟ <a href="#" onclick="showSignup()">ایجاد حساب</a></p>
+          <p id="loginMsg"></p>
+        </div>
+
+        <div id="signupFormBox" style="display:none;">
+          <h2>📝 ثبت‌نام</h2>
+          <input type="text" id="signupName" placeholder="نام و نام خانوادگی" required>
+          <input type="email" id="signupEmail" placeholder="ایمیل" required>
+          <input type="password" id="signupPassword" placeholder="رمز عبور" required>
+          <input type="password" id="signupPassword2" placeholder="تکرار رمز عبور" required>
+
+          <button onclick="signup()">ثبت‌نام</button>
+          <p class="switch-form">حساب داری؟ <a href="#" onclick="showLogin()">ورود</a></p>
+          <p id="signupMsg"></p>
+        </div>
+      </div>
     </div>
+
   </div>
 
-  <div class="related-books">
-    <h3 style="color:var(--secondary-color);">
-        <span class="material-icons-outlined" style="color:var(--accent-color);">auto_stories</span>
-        کتاب‌های مرتبط
-    </h3>
-    <div id="relatedGrid" class="related-grid"></div>
-  </div>
+  <script>
+    const API = "http://localhost:3000";
+    const params = new URLSearchParams(window.location.search);
+    const bookId = params.get("id");
 
-</div>
+    const modal = document.getElementById("authModal");
+    const loginBox = document.getElementById("loginFormBox");
+    const signupBox = document.getElementById("signupFormBox");
 
-<footer>
-  <div class="container">
-  <div class="footer-container">
-    <div class="footer-col">
-      <h3>درباره سامانه</h3>
-      <p>این سامانه جهت مدیریت کتابخانه دانشگاه ابن‌حسام طراحی شده است. هدف، سهولت دسترسی اعضا به منابع است.</p>
-    </div>
+    const userNameDisplay = document.getElementById("userNameDisplay");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const openAuth = document.getElementById("openAuth");
+    const menuUserName = document.getElementById("menuUserName");
+    const menuProfile = document.getElementById("menuProfile");
+    const userMenu = document.getElementById("userMenu");
+    const pendingBox = document.getElementById("pendingBox");
 
-    <div class="footer-col">
-      <h3>پیوندهای مفید</h3>
-      <ul>
-        <li><a href="#">کتابخانه مرکزی</a></li>
-        <li><a href="#">سیستم عضویت</a></li>
-        <li><a href="#">نقشه سایت</a></li>
-      </ul>
-    </div>
+    const statusBadge = document.getElementById("statusBadge");
+    const borrowBtn = document.getElementById("borrowBtn");
 
-    <div class="footer-col">
-      <h3>ارتباط با ما</h3>
-      <p>📧 info@ibnhesam.ac.ir</p>
-      <p>☎️ ۰۵۶-۳۲۲۴۰۰۰</p>
-      <p>📍 بیرجند، دانشگاه ابن‌حسام</p>
-    </div>
-  </div>
-
-  <p class="copy">© کلیه حقوق این سامانه محفوظ است.</p>
-  </div>
-</footer>
-
-<script>
-const API = "http://localhost:3000";
-const params = new URLSearchParams(window.location.search);
-const bookId = params.get("id");
-
-const token = localStorage.getItem("token");
-const user = JSON.parse(localStorage.getItem("user") || "{}");
-const isPending = user.role === "pending";
-const isMember  = user.role === "member";
-const userNameDisplay = document.getElementById("userNameDisplay");
-const openAuth = document.getElementById("openAuth");
-const logoutBtn = document.getElementById("logoutBtn");
-const menuUserName = document.getElementById("menuUserName");
-const menuProfile = document.getElementById("menuProfile");
-const userMenu = document.getElementById("userMenu");
-const pendingBox = document.getElementById("pendingBox");
-const borrowBtn = document.getElementById("borrowBtn");
-
-
-/* ------------------- هدر و منوی کاربر ------------------- */
-function initHeader() {
-  if (user?.name) {
-    userNameDisplay.textContent = user.name;
-    userNameDisplay.style.display = "inline-block";
-    openAuth.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-    menuUserName.textContent = user.name;
-    
-    // تنظیم لینک پروفایل بسته به نقش
-    menuProfile.onclick = () => {
-      if (user.role === "admin") {
-         window.location.href = "admin-panel.html";
-      } else {
-         window.location.href = "member-panel.html";
-      }
+    const state = {
+      book: null,
+      allBooks: []
     };
+
+    // --------- Auth modal ----------
+    openAuth.onclick = () => {
+      modal.style.display = "flex";
+      showLogin();
+    };
+
+    function closeModal() { modal.style.display = "none"; }
+
+    function showSignup() {
+      loginBox.style.display = "none";
+      signupBox.style.display = "block";
+      signupMsg.textContent = "";
+    }
+
+    function showLogin() {
+      signupBox.style.display = "none";
+      loginBox.style.display = "block";
+      loginMsg.textContent = "";
+    }
+
+    async function signup() {
+      const name = signupName.value;
+      const email = signupEmail.value;
+      const password = signupPassword.value;
+      const pass2 = signupPassword2.value;
+
+      if (password !== pass2) {
+        signupMsg.textContent = "❌ رمزها یکسان نیستند";
+        signupMsg.style.color = "var(--danger)";
+        return;
+      }
+
+      const res = await fetch(`${API}/api/signup`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({name,email,password})
+      });
+
+      const data = await res.json();
+      signupMsg.textContent = data.message || data.error;
+      signupMsg.style.color = data.error ? "var(--danger)" : "var(--success)";
+
+      if (!data.error) setTimeout(showLogin, 1500);
+    }
+
+    async function login() {
+      const email = loginEmail.value;
+      const password = loginPassword.value;
+
+      const res = await fetch(`${API}/api/login`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({email,password})
+      });
+
+      const data = await res.json();
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        closeModal();
+        window.location.reload();
+      } else {
+        loginMsg.textContent = data.error;
+        loginMsg.style.color = "var(--danger)";
+      }
+    }
+
+    // --------- Header state ----------
+    function initHeader() {
+      const savedUser = localStorage.getItem("user");
+      if (!savedUser) return;
+
+      const u = JSON.parse(savedUser);
+      if (!u?.name) return;
+
+      userNameDisplay.textContent = u.name;
+      userNameDisplay.style.display = "inline-flex";
+      logoutBtn.style.display = "inline-flex";
+      openAuth.style.display = "none";
+
+      menuUserName.textContent = u.name;
+
+      if (u.role === "pending") pendingBox.style.display = "block";
+
+      menuProfile.onclick = () => {
+        if (u.role === "admin") window.location.href = "admin-panel.html";
+        else window.location.href = "member-panel.html";
+      };
+    }
 
     logoutBtn.onclick = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "index.html";
+      window.location.reload();
     };
 
     userNameDisplay.onclick = () => {
-      userMenu.style.display =
-        userMenu.style.display === "none" ? "block" : "none";
+      userMenu.style.display = (userMenu.style.display === "none" || userMenu.style.display === "") ? "block" : "none";
     };
-    
-    // بستن منوی پروفایل با کلیک بیرون
+
     document.addEventListener("click", (e) => {
-        if (!e.target.closest(".header-icons") && userMenu) {
-            userMenu.style.display = "none";
-        }
+      if (!e.target.closest(".header-icons") && userMenu) userMenu.style.display = "none";
     });
 
-  } else {
-      openAuth.onclick = () => {
-          // در صورت عدم ورود، کاربر را به صفحه اصلی هدایت کن تا مودال ورود باز شود
-          window.location.href = "index.html"; 
-      };
-  }
-}
+    // --------- Share ----------
+    function copyShareLink() {
+      try {
+        navigator.clipboard.writeText(window.location.href);
+        alert("لینک صفحه کپی شد ✅");
+      } catch {
+        alert("کپی خودکار انجام نشد. لینک را دستی کپی کنید.");
+      }
+    }
 
-if (isPending) {
-  pendingBox.style.display = "block";
-}
+    // --------- Data ----------
+    async function loadAllBooks() {
+      const res = await fetch(`${API}/api/public/books`);
+      const books = await res.json();
+      state.allBooks = Array.isArray(books) ? books : [];
+    }
 
-/* ------------------- لود اطلاعات کتاب ------------------- */
-async function loadBook() {
-  const res = await fetch(`${API}/api/public/books`);
-  const books = await res.json();
+    async function loadBook() {
+      if (!bookId) {
+        alert("شناسه کتاب نامعتبر است.");
+        return;
+      }
 
-  const book = books.find((b) => b.id == bookId);
-  if (!book) {
-    document.getElementById("bookTitle").textContent = "کتاب یافت نشد";
-    return;
-  }
-  const bookImg = document.getElementById("bookImg");
+      // اگر قبلاً لیست رو لود نکرده‌ایم
+      if (!state.allBooks.length) await loadAllBooks();
 
-bookImg.src = book.image
-  ? `${API}${book.image}`
-  : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
+      const book = state.allBooks.find(b => String(b.id) === String(bookId));
+      if (!book) {
+        alert("کتاب یافت نشد");
+        return;
+      }
 
-  document.getElementById("bookTitle").textContent = book.title;
-  document.getElementById("bookAuthor").textContent = book.author;
-  document.getElementById("bookYear").textContent = book.publication_year;
-  document.getElementById("bookCategory").textContent = book.category ?? "—";
-  
-  const copiesSpan = document.getElementById("bookCopies");
-  copiesSpan.textContent = book.available_copies;
-  copiesSpan.style.color = book.available_copies > 0 ? 'var(--success)' : 'var(--danger)';
+      state.book = book;
 
+      // Fill UI
+      document.getElementById("bookTitle").textContent = book.title || "—";
+      document.getElementById("crumbTitle").textContent = book.title || "—";
 
-  // منطق دکمه امانت
-  if (!token) {
-    borrowBtn.classList.add("disabled");
-    borrowBtn.textContent = "برای امانت، وارد شوید";
-    borrowBtn.onclick = () => window.location.href = "index.html";
-  } else if (isPending) {
-    borrowBtn.classList.add("disabled");
-    borrowBtn.textContent = "امانت (در انتظار تایید)";
-    borrowBtn.onclick = () =>
-      alert("پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.");
-  } else if (book.available_copies < 1) {
-    borrowBtn.classList.add("disabled");
-    borrowBtn.style.background = 'var(--danger)';
-    borrowBtn.textContent = "موجودی به اتمام رسیده است";
-    borrowBtn.onclick = () => {};
-  } else {
-    borrowBtn.onclick = () => borrowBook(book.id);
-  }
+      document.getElementById("bookAuthor").textContent = book.author || "—";
+      document.getElementById("bookYear").textContent = book.publication_year ?? "—";
+      document.getElementById("bookCategory").textContent = book.category ?? "—";
+      document.getElementById("crumbCategory").textContent = book.category ?? "—";
+      document.getElementById("bookISBN").textContent = book.isbn ?? "—";
+      document.getElementById("bookShelf").textContent = book.shelf_code ?? "—";
+      document.getElementById("bookDesc").textContent = book.description ?? "—";
 
+      const imgUrl = book.image ? `${API}${book.image}` : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
+      document.getElementById("bookImg").src = imgUrl;
 
-  // لود کتاب‌های مرتبط
-  const related = books.filter(
-    (b) => b.category === book.category && b.id != book.id
-  );
-  const relatedGrid = document.getElementById("relatedGrid");
+      // Copies
+      const available = Number(book.available_copies ?? 0);
+      const total = Number(book.total_copies ?? book.copies ?? book.total ?? available);
 
-  relatedGrid.innerHTML = related.length
-  ? related.map(b => {
-      const img = b.image
-        ? `${API}${b.image}`
-        : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
+      document.getElementById("copiesTotal").textContent = isNaN(total) ? available : total;
+      document.getElementById("copiesAvailable").textContent = isNaN(available) ? 0 : available;
 
-      return `
-        <div class="related-item"
-             onclick="location.href='book.html?id=${b.id}'">
-          <img src="${img}" alt="تصویر کتاب">
-          <p>${b.title}</p>
-        </div>
-      `;
-    }).join("")
-  : "<p style='color:var(--text-light);'>کتاب مشابهی یافت نشد.</p>";
+      // Status badge
+      if (available > 0) {
+        statusBadge.textContent = "موجود";
+        statusBadge.classList.remove("borrowed");
+      } else {
+        statusBadge.textContent = "امانت";
+        statusBadge.classList.add("borrowed");
+      }
 
-}
+      setupBorrowButton(book, available);
 
-/* ------------------- امانت گرفتن ------------------- */
-async function borrowBook(id) {
-  if (!token || !isMember) {
-    alert("شما مجوز امانت گرفتن ندارید (وارد حساب شوید و/یا منتظر تایید مدیر بمانید).");
-    return;
-  }
-  
-  // دکمه را غیرفعال می‌کنیم تا کاربر دوبار کلیک نکند
-  borrowBtn.classList.add("disabled");
-  borrowBtn.textContent = "در حال ثبت...";
+      renderRelated(book);
+    }
 
-  const res = await fetch(`${API}/api/borrow`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token
-    },
-    body: JSON.stringify({ book_id: id })
-  });
+    function setupBorrowButton(book, available) {
+      const token = localStorage.getItem("token");
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const data = await res.json();
-  borrowBtn.classList.remove("disabled"); // فعال‌سازی مجدد
+      // Not logged in
+      if (!token) {
+        borrowBtn.classList.add("disabled");
+        borrowBtn.onclick = () => {
+          alert("برای امانت گرفتن ابتدا وارد حساب کاربری شوید.");
+          modal.style.display = "flex";
+          showLogin();
+        };
+        return;
+      }
 
-  if (!res.ok) {
-    alert(data.error || "خطا در امانت گرفتن کتاب. شاید قبلاً امانت گرفته‌اید یا موجودی کافی نیست.");
-    borrowBtn.textContent = "امانت گرفتن";
-    return;
-  }
+      // Pending
+      if (u.role === "pending") {
+        borrowBtn.classList.add("disabled");
+        borrowBtn.onclick = () => alert("پس از تایید مدیر می‌توانید کتاب‌ها را امانت بگیرید.");
+        return;
+      }
 
-  alert(data.message || "کتاب با موفقیت امانت گرفته شد. برای مشاهده به داشبورد کاربر مراجعه کنید.");
-  loadBook(); // بروزرسانی موجودی و وضعیت دکمه
-}
+      // Available?
+      if (available <= 0) {
+        borrowBtn.classList.add("disabled");
+        borrowBtn.onclick = () => alert("این کتاب فعلاً موجود نیست.");
+        return;
+      }
 
-initHeader();
-loadBook();
-</script>
+      // Member/admin allowed? (تو پروژه‌ات معمولاً member)
+      borrowBtn.classList.remove("disabled");
+      borrowBtn.onclick = () => borrowBook(book.id);
+    }
 
+    async function borrowBook(id) {
+      const token = localStorage.getItem("token");
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+
+      if (!token || (u.role !== "member" && u.role !== "admin")) {
+        alert("شما مجوز امانت گرفتن ندارید.");
+        return;
+      }
+
+      const res = await fetch(`${API}/api/borrow`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ book_id: id })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "خطا در امانت گرفتن کتاب.");
+        return;
+      }
+
+      alert(
+        (data.message || "کتاب با موفقیت امانت گرفته شد.") +
+        (data.due_date ? "\n📅 تاریخ بازگشت: " + data.due_date : "")
+      );
+
+      // refresh
+      await loadAllBooks();
+      await loadBook();
+    }
+
+    function renderRelated(book) {
+      const grid = document.getElementById("relatedGrid");
+      const related = state.allBooks
+        .filter(b => b.category && book.category && b.category === book.category && String(b.id) !== String(book.id))
+        .slice(0, 12);
+
+      if (!related.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;color:#64748b;font-weight:900;">کتاب مشابهی یافت نشد.</div>`;
+        return;
+      }
+
+      grid.innerHTML = related.map(b => {
+        const img = b.image ? `${API}${b.image}` : "https://cdn-icons-png.flaticon.com/512/29/29302.png";
+        return `
+          <div class="related-item" onclick="location.href='book.html?id=${b.id}'">
+            <img src="${img}" alt="جلد کتاب">
+            <div class="r-body">
+              <p class="r-title" title="${b.title || ''}">${b.title || '—'}</p>
+              <p class="r-author" title="${b.author || ''}">${b.author || ''}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // init
+    initHeader();
+    loadBook();
+  </script>
 </body>
 </html>

@@ -533,141 +533,247 @@ app.get("/api/admin/books", auth, admin, async (req, res) => {
 
     // =========================================================
     // 🔁 Borrow Book (Member only)
-    app.post("/api/borrow", auth, async (req, res) => {
-      const { book_id } = req.body;
+    // =========================================================
+// 🔁 Borrow Book (Member only)
+// =========================================================
+app.post("/api/borrow", auth, async (req, res) => {
+  const { book_id } = req.body;
 
-      // فقط member (اکانت تایید شده)
-      if (req.user.role !== "member") {
-        return res.status(403).json({ error: "حساب شما هنوز تایید نشده است" });
-      }
-
-      try {
-        // بررسی موجودی کتاب
-        const [[book]] = await pool.query(
-          "SELECT id, available_copies FROM books WHERE id=?",
-          [book_id]
-        );
-
-        if (!book) return res.status(404).json({ error: "کتاب یافت نشد" });
-
-        if (book.available_copies <= 0) {
-          return res.status(400).json({ error: "موجودی کتاب تمام شده است" });
-        }
-
-        // محدودیت ۳ امانت فعال
-        const [[cnt]] = await pool.query(
-          "SELECT COUNT(*) AS count FROM borrows WHERE member_id=? AND status='borrowed'",
-          [req.user.id]
-        );
-
-        if (cnt.count >= 3) {
-          return res
-            .status(400)
-            .json({ error: "حداکثر ۳ کتاب می‌توانید امانت بگیرید" });
-        }
-
-        // ثبت امانت
-        await pool.query(
-          "INSERT INTO borrows (book_id, member_id, borrow_date, status) VALUES (?, ?, NOW(), 'borrowed')",
-          [book_id, req.user.id]
-        );
-
-        // کاهش موجودی
-        await pool.query(
-          "UPDATE books SET available_copies = available_copies - 1 WHERE id=?",
-          [book_id]
-        );
-
-        res.json({ message: "کتاب با موفقیت امانت گرفته شد" });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "خطا در امانت گرفتن کتاب" });
-      }
+  // ⛔ فقط کاربران تایید شده (member) اجازه امانت دارند
+  if (req.user.role !== "member") {
+    return res.status(403).json({
+      error: "حساب شما هنوز تایید نشده است"
     });
+  }
+
+  try {
+    // 📌 بررسی وجود کتاب و موجودی آن
+    const [[book]] = await pool.query(
+      "SELECT id, available_copies FROM books WHERE id=?",
+      [book_id]
+    );
+
+    // اگر کتاب وجود نداشت
+    if (!book) {
+      return res.status(404).json({ error: "کتاب یافت نشد" });
+    }
+
+    // اگر موجودی صفر بود
+    if (book.available_copies <= 0) {
+      return res.status(400).json({ error: "موجودی کتاب تمام شده است" });
+    }
+
+    // 📌 محدودیت: هر کاربر حداکثر ۳ امانت فعال
+    const [[cnt]] = await pool.query(
+      "SELECT COUNT(*) AS count FROM borrows WHERE member_id=? AND status='borrowed'",
+      [req.user.id]
+    );
+
+    if (cnt.count >= 3) {
+      return res.status(400).json({
+        error: "حداکثر ۳ کتاب می‌توانید امانت بگیرید"
+      });
+    }
+
+    // =================================================
+    // ⭐ محاسبه تاریخ امانت و تاریخ مجاز بازگشت
+    // =================================================
+
+    // تاریخ امانت (الان)
+    const borrowDate = new Date();
+
+    // تاریخ بازگشت = ۷ روز بعد از تاریخ امانت
+const dueDate = new Date();
+dueDate.setDate(dueDate.getDate() + 7);
+
+
+
+    // =================================================
+    // 📝 ثبت امانت در دیتابیس
+    // =================================================
+    await pool.query(
+      `INSERT INTO borrows 
+       (book_id, member_id, borrow_date, due_date, status)
+       VALUES (?, ?, ?, ?, 'borrowed')`,
+      [
+        book_id,         // شناسه کتاب
+        req.user.id,     // شناسه عضو
+        borrowDate,      // تاریخ امانت
+        dueDate          // تاریخ مجاز بازگشت
+      ]
+    );
+
+    // =================================================
+    // 📉 کاهش موجودی کتاب
+    // =================================================
+    await pool.query(
+      "UPDATE books SET available_copies = available_copies - 1 WHERE id=?",
+      [book_id]
+    );
+
+    // =================================================
+    // 📤 ارسال پاسخ به کاربر
+    // =================================================
+    res.json({
+      message: "کتاب با موفقیت امانت گرفته شد",
+      // ارسال تاریخ برگشت برای نمایش در رابط کاربری
+      due_date: dueDate.toISOString().split("T")[0]
+    });
+
+  } catch (err) {
+    console.error("Borrow error:", err);
+    res.status(500).json({
+      error: "خطا در امانت گرفتن کتاب"
+    });
+  }
+});
 
     // --------------------------------------
     // 📘 My Borrows (Member) - برای member-panel
     // --------------------------------------
-    app.get("/api/my-borrows", auth, async (req, res) => {
-      if (req.user.role !== "member") {
-        return res.status(403).json({ error: "دسترسی غیرمجاز" });
-      }
+    // 🔁 امانت‌های کاربر (پنل کاربر)
+app.get("/api/my-borrows", auth, async (req, res) => {
+  if (req.user.role !== "member") {
+    return res.status(403).json({ error: "دسترسی غیرمجاز" });
+  }
 
-      try {
-        const [rows] = await pool.query(
-          `SELECT b.id, bk.title, b.borrow_date, b.return_date, b.status
-           FROM borrows b
-           JOIN books bk ON bk.id = b.book_id
-           WHERE b.member_id = ?
-           ORDER BY b.borrow_date DESC`,
-          [req.user.id]
-        );
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        b.id,
+        bk.title,
+        b.borrow_date,
+        b.due_date,        -- ⭐ تاریخ مجاز بازگشت
+        b.return_date,
+        b.status
+      FROM borrows b
+      JOIN books bk ON bk.id = b.book_id
+      WHERE b.member_id = ?
+      ORDER BY b.borrow_date DESC
+      `,
+      [req.user.id]
+    );
 
-        res.json(rows);
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "خطا در دریافت امانت‌ها" });
-      }
-    });
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "خطا در دریافت امانت‌ها" });
+  }
+});
+
 
     // --------------------------------------
-    // 📋 Active Borrows (Admin) - برای admin-panel
-    // --------------------------------------
-    app.get("/api/borrows/active", auth, admin, async (req, res) => {
-      try {
-        const [rows] = await pool.query(
-          `SELECT b.id, u.name AS member, bk.title, b.borrow_date
-           FROM borrows b
-           JOIN users u ON u.id = b.member_id
-           JOIN books bk ON bk.id = b.book_id
-           WHERE b.status='borrowed'
-           ORDER BY b.borrow_date DESC`
-        );
-        res.json(rows);
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "خطا در دریافت امانت‌های فعال" });
-      }
-    });
+// 📋 Active Borrows (Admin) - اصلاح شده
+// --------------------------------------
+app.get("/api/borrows/active", auth, admin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        b.id,
+        u.name AS member,
+        bk.title,
+        b.borrow_date,
+        b.due_date,       
+        b.return_date,
+        b.status
+      FROM borrows b
+      JOIN users u ON u.id = b.member_id
+      JOIN books bk ON bk.id = b.book_id
+      WHERE b.status = 'borrowed'
+      ORDER BY b.borrow_date DESC
+      `
+    );
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error("Error loading active borrows:", err);
+    res.status(500).json({ error: "خطا در دریافت امانت‌های فعال" });
+  }
+});
+
 
     // --------------------------------------
     // 🔄 Return Book (Admin)
     // --------------------------------------
     app.post("/api/return/:borrowId", auth, admin, async (req, res) => {
-      const { borrowId } = req.params;
 
-      try {
-        const [[borrow]] = await pool.query(
-          "SELECT book_id, status FROM borrows WHERE id=?",
-          [borrowId]
-        );
+  const FINE_PER_DAY = 50000; // مبلغ جریمه روزانه (تومان)
+  const { borrowId } = req.params;
 
-        if (!borrow) return res.status(404).json({ error: "امانت یافت نشد" });
+  try {
+    // 1️⃣ دریافت اطلاعات امانت
+    const [[borrow]] = await pool.query(
+      `SELECT id, book_id, member_id, due_date, status
+       FROM borrows
+       WHERE id=?`,
+      [borrowId]
+    );
 
-        if (borrow.status !== "borrowed") {
-          return res
-            .status(400)
-            .json({ error: "این امانت قبلاً بازگردانده شده است" });
-        }
+    if (!borrow) {
+      return res.status(404).json({ error: "امانت یافت نشد" });
+    }
 
-        // تغییر وضعیت + ثبت تاریخ بازگشت
-        await pool.query(
-          "UPDATE borrows SET status='returned', return_date=NOW() WHERE id=?",
-          [borrowId]
-        );
+    if (borrow.status !== "borrowed") {
+      return res.status(400).json({ error: "این امانت قبلاً بسته شده است" });
+    }
 
-        // افزایش موجودی
-        await pool.query(
-          "UPDATE books SET available_copies = available_copies + 1 WHERE id=?",
-          [borrow.book_id]
-        );
+    // 2️⃣ محاسبه دیرکرد
+    let fine = 0;
 
-        res.json({ message: "کتاب با موفقیت بازگردانده شد" });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "خطا در بازگشت کتاب" });
+    if (borrow.due_date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const dueDate = new Date(borrow.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (today > dueDate) {
+        const diffTime = today.getTime() - dueDate.getTime();
+        const lateDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        fine = lateDays * FINE_PER_DAY;
       }
+    }
+
+    // 3️⃣ ثبت بازگشت کتاب
+    await pool.query(
+      `UPDATE borrows
+       SET status='returned', return_date=NOW()
+       WHERE id=?`,
+      [borrowId]
+    );
+
+    // 4️⃣ افزایش موجودی کتاب
+    await pool.query(
+      `UPDATE books
+       SET available_copies = available_copies + 1
+       WHERE id=?`,
+      [borrow.book_id]
+    );
+
+    // 5️⃣ کسر جریمه از کیف پول (حتی اگر منفی شود)
+    if (fine > 0) {
+      await pool.query(
+        `UPDATE users
+         SET wallet = wallet - ?
+         WHERE id=?`,
+        [fine, borrow.member_id]
+      );
+    }
+
+    res.json({
+      message: "کتاب با موفقیت بازگردانده شد",
+      fine: fine
     });
+
+  } catch (err) {
+    console.error("Return error:", err);
+    res.status(500).json({ error: "خطا در ثبت بازگشت کتاب" });
+  }
+});
+
 
 // سوابق امانت‌های تکمیل‌شده (برگشتی)
 app.get("/api/borrows/history", auth, admin, async (req, res) => {
@@ -717,6 +823,31 @@ app.get("/api/search/books", async (req, res) => {
   }
 });
 
+// =========================
+// 💰 Wallet - Member
+// =========================
+app.get("/api/wallet", auth, async (req, res) => {
+
+  // فقط اعضا
+  if (req.user.role !== "member") {
+    return res.status(403).json({ error: "دسترسی غیرمجاز" });
+  }
+
+  try {
+    const [[user]] = await pool.query(
+      "SELECT wallet FROM users WHERE id=?",
+      [req.user.id]
+    );
+
+    res.json({
+      wallet: user.wallet
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "خطا در دریافت کیف پول" });
+  }
+});
 
 
     // --------------------------------------

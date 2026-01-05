@@ -442,11 +442,12 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  display: flex;
-  align-items: center;     /* ⬅️ وسط عمودی */
-  justify-content: center; /* ⬅️ وسط افقی */
+  display: none;          /* ✅ پیش‌فرض مخفی */
+  align-items: center;
+  justify-content: center;
   z-index: 9999;
 }
+
 
 
 /* دکمه‌های پایین مودال */
@@ -473,8 +474,237 @@
   background: #e5e7eb;
   color: #1f2937;
 }    
+</style>
+<style id="saas-light-override">
+/* ================================
+   SaaS Light – UI Refinement
+   (NO JS / NO HTML changes)
+================================ */
 
-  </style>
+/* -------- Colors refinement -------- */
+:root{
+  --bg-color:#f5f7fb;
+  --card-bg:#ffffff;
+  --secondary-color:#0f172a;
+
+  --text-main:#0f172a;
+  --text-light:#64748b;
+
+  --border-soft:1px solid rgba(15,23,42,.06);
+  --shadow-soft:0 8px 30px rgba(15,23,42,.06);
+}
+
+/* -------- Body & content -------- */
+body{
+  background:linear-gradient(180deg,#f6f8fc,#eef2f7);
+}
+
+.content{
+  padding:48px;
+}
+
+/* -------- Sidebar -------- */
+.sidebar{
+  background:linear-gradient(180deg,#0f172a,#020617);
+  box-shadow:none;
+}
+
+.sidebar h2{
+  font-size:1.15rem;
+  letter-spacing:.3px;
+}
+
+.sidebar-nav a{
+  border-radius:10px;
+  margin:4px 14px;
+  transition:background .2s,color .2s;
+}
+
+.sidebar-nav a:hover{
+  background:rgba(255,255,255,.06);
+  transform:none; /* ❌ حذف پرش */
+}
+
+.sidebar-nav a.active{
+  background:rgba(59,130,246,.18);
+  border-right:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
+/* -------- Page titles -------- */
+h2{
+  font-size:2rem;
+  font-weight:800;
+  color:#020617;
+}
+
+h2 .material-icons-outlined{
+  opacity:.5;
+}
+
+/* -------- Cards (Dashboard) -------- */
+.dashboard-cards{
+  gap:18px;
+}
+
+.card{
+  border:none;
+  box-shadow:var(--shadow-soft);
+  border-radius:18px;
+  padding:26px;
+}
+
+.card h3{
+  font-size:.85rem;
+  letter-spacing:.3px;
+}
+
+.card p{
+  font-size:2.2rem;
+}
+
+/* -------- Tables -------- */
+table{
+  border:none;
+  box-shadow:var(--shadow-soft);
+  border-radius:18px;
+}
+
+th{
+  background:#f8fafc;
+  color:#475569;
+  font-size:.72rem;
+  letter-spacing:.06em;
+}
+
+td{
+  border-top:1px solid rgba(15,23,42,.05);
+}
+
+tr:nth-child(even){
+  background:transparent; /* ❌ حذف zebra */
+}
+
+tr:hover{
+  background:rgba(59,130,246,.04);
+}
+
+/* -------- Table actions (SaaS style) -------- */
+.btn-action{
+  opacity:0;
+  transition:opacity .15s;
+}
+
+tr:hover .btn-action{
+  opacity:1;
+}
+
+/* -------- Buttons -------- */
+button,
+.btn-add-member{
+  border-radius:10px;
+  font-weight:600;
+}
+
+.form-box button,
+.btn-add-member{
+  box-shadow:0 6px 18px rgba(59,130,246,.25);
+}
+
+/* -------- Forms -------- */
+.form-box{
+  border:none;
+  box-shadow:var(--shadow-soft);
+  border-radius:18px;
+}
+
+.form-box input,
+.form-box select{
+  background:#f8fafc;
+  border:1px solid rgba(15,23,42,.08);
+}
+
+.form-box input:focus,
+.form-box select:focus{
+  background:white;
+}
+
+/* -------- Modals -------- */
+.modal{
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(6px);
+}
+
+.modal-content{
+  border:none;
+  box-shadow:0 25px 80px rgba(15,23,42,.35);
+  border-radius:20px;
+}
+
+/* -------- Mobile polish -------- */
+@media (max-width:900px){
+  .content{
+    padding:24px;
+  }
+}
+/* ================================
+   SaaS Final Polish – Visual Density
+================================ */
+
+/* Sidebar density */
+.sidebar-nav a{
+  padding:12px 18px;
+  font-size:.88rem;
+}
+
+/* Page titles refinement */
+h2{
+  margin-bottom:18px;
+  font-size:1.85rem;
+}
+
+/* Tables – compact SaaS look */
+th, td{
+  padding:12px 14px;
+  font-size:.82rem;
+}
+
+th{
+  text-transform:uppercase;
+}
+
+/* Action buttons – lighter */
+.btn-action{
+  padding:6px 10px;
+  border-radius:8px;
+}
+
+/* Dashboard cards – cleaner */
+.card{
+  padding:22px;
+}
+
+.card p{
+  font-size:2rem;
+}
+
+/* Forms – less boxy */
+.form-box{
+  padding:24px;
+}
+
+.form-box h3{
+  font-size:1rem;
+}
+
+/* Modal title */
+.modal-content h3{
+  margin-top:0;
+  margin-bottom:20px;
+  font-size:1.1rem;
+}
+
+</style>
 
 </head>
 <body>
@@ -1210,69 +1440,126 @@ function editBook(book) {
        مدیریت امانت‌ها
     ============================= */
 
-    async function loadBorrows(type = "active") {
-      const endpoint =
-        type === "returned"
-          ? `${API}/api/borrows/history`
-          : `${API}/api/borrows/active`;
+    /* =============================
+   💰 تنظیم مبلغ جریمه
+============================= */
+const FINE_PER_DAY = 50000; // تومان
 
-      const res = await fetch(endpoint, {
-        headers: { Authorization: "Bearer " + token }
-      });
 
-      const borrows = await res.json();
-      const tbody = document.getElementById("borrowsTable");
+//----/
 
-      if (!borrows || borrows.length === 0) {
-        tbody.innerHTML =
-          `<tr><td colspan="5" style="padding:20px; color:#999; text-align:center;">موردی یافت نشد</td></tr>`;
-        return;
-      }
+// ==============================
+// 🧠 نرمال‌سازی تاریخ (فقط DATE بدون ساعت)
+// ==============================
+function normalizeDate(dateStr) {
+  // مثال ورودی:
+  // 2025-02-05
+  // 2025-02-05T00:00:00.000Z
+  const [y, m, d] = dateStr.split("T")[0].split("-");
+  return new Date(Number(y), Number(m) - 1, Number(d));
+}
 
-      tbody.innerHTML = borrows.map(b => {
-        const borrowDate = new Date(b.borrow_date);
-        const returnDate = b.return_date ? new Date(b.return_date) : null;
+/* =============================
+   📦 لود امانت‌ها (ادمین)
+============================= */
+async function loadBorrows(type = "active") {
 
-        const dueDate = new Date(borrowDate);
-        dueDate.setDate(dueDate.getDate() + 14);
+  const endpoint =
+    type === "returned"
+      ? `${API}/api/borrows/history`
+      : `${API}/api/borrows/active`;
 
-        let statusText = "در مهلت";
-        let statusColor = "var(--success)";
+  const res = await fetch(endpoint, {
+    headers: { Authorization: "Bearer " + token }
+  });
 
-        if (!returnDate && new Date() > dueDate) {
-          const delayDays =
-            Math.ceil((new Date() - dueDate) / (1000 * 60 * 60 * 24));
-          statusText = `تاخیر ${delayDays} روز`;
-          statusColor = "var(--danger)";
-        }
+  const borrows = await res.json();
+  const tbody = document.getElementById("borrowsTable");
 
-        if (returnDate) {
-          statusText = "بازگشت شده";
-          statusColor = "#64748b";
-        }
+  // اگر داده‌ای وجود نداشت
+  if (!borrows || borrows.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="padding:20px; color:#999; text-align:center;">
+          موردی یافت نشد
+        </td>
+      </tr>`;
+    return;
+  }
 
-        return `
-          <tr>
-            <td style="font-weight:bold">${b.member}</td>
-            <td>${b.title}</td>
-            <td>${borrowDate.toLocaleDateString("fa-IR")}</td>
-            <td style="color:${statusColor};font-weight:bold;">
-              ${statusText}
-            </td>
-            <td>
-              ${
-                !returnDate
-                  ? `<button class="btn-action btn-edit" onclick="returnBorrow(${b.id})">
-                       <span class="material-icons-outlined" style="font-size:16px;">keyboard_return</span>
-                       ثبت بازگشت
-                     </button>`
-                  : "—"
-              }
-            </td>
-          </tr>
-        `;
-      }).join("");
+  // تاریخ امروز (بدون ساعت)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  tbody.innerHTML = borrows.map(b => {
+const borrowDate = normalizeDate(b.borrow_date);
+const dueDate    = b.due_date ? normalizeDate(b.due_date) : null;
+const returnDate = b.return_date ? normalizeDate(b.return_date) : null;
+
+    let statusText = "";
+    let statusColor = "";
+
+    /* =============================
+       🧠 تعیین وضعیت امانت
+    ============================= */
+
+    if (returnDate) {
+      // ✅ بازگشت شده
+      statusText = "بازگشت شده";
+      statusColor = "#64748b";
+
+    } else if (dueDate && today > dueDate) {
+      // ⛔ دیرکرد
+      const diffTime = today.getTime() - dueDate.getTime();
+const lateDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      const fineAmount = lateDays * FINE_PER_DAY;
+
+      statusText = `⛔ ${lateDays} روز دیرکرد
+      <br>
+      <span style="font-size:0.8rem; color:#7f1d1d;">
+        ${fineAmount.toLocaleString("fa-IR")} تومان جریمه
+      </span>`;
+
+      statusColor = "var(--danger)";
+
+    } else {
+      // 🟢 در مهلت
+      statusText = "در مهلت";
+      statusColor = "var(--success)";
     }
+
+    return `
+      <tr>
+        <td style="font-weight:bold">${b.member}</td>
+        <td>${b.title}</td>
+        <td>
+          ${borrowDate.toLocaleDateString("fa-IR")}
+          <br>
+          <span style="font-size:0.75rem; color:#64748b;">
+            موعد: ${dueDate ? dueDate.toLocaleDateString("fa-IR") : "—"}
+          </span>
+        </td>
+        <td style="color:${statusColor}; font-weight:bold;">
+          ${statusText}
+        </td>
+        <td>
+          ${
+            !returnDate
+              ? `<button class="btn-action btn-edit"
+                   onclick="returnBorrow(${b.id})">
+                   <span class="material-icons-outlined" style="font-size:16px;">
+                     keyboard_return
+                   </span>
+                   ثبت بازگشت
+                 </button>`
+              : "—"
+          }
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
     async function returnBorrow(borrowId) {
       if (!confirm("کتاب بازگردانده شود؟")) return;
